@@ -1,0 +1,18 @@
+[project]
+name = "ccfc-youtube"
+version = "0.1.0"
+description = "Analytics for ccfc related youtube videos"
+authors = [
+    {name = "Billy Moore"}
+]
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "google-api-python-client (>=2.172.0,<3.0.0)",
+    "pytest (>=8.4.1,<9.0.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
