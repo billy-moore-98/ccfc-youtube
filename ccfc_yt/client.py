@@ -9,11 +9,11 @@ class YoutubeClient:
     def __init__(self, api_key: str):
         self.api_key = api_key
         
-    def service(self):
+    def _service(self):
         return build("youtube", "v3", developerKey=self.api_key, static_discovery=False)
     
     def search(self, query: str, max_results: int = 10) -> dict:
-        service = self.service()
+        service = self._service()
         try:
             request = service.search().list(
                 q=query,
