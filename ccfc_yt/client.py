@@ -12,14 +12,15 @@ class YoutubeClient:
     def _service(self):
         return build("youtube", "v3", developerKey=self.api_key, static_discovery=False)
     
-    def search(self, query: str, max_results: int = 10) -> dict:
+    def search(self, query: str, max_results: int = 10, **kwargs) -> dict:
         service = self._service()
         try:
             request = service.search().list(
                 q=query,
                 part="snippet",
                 maxResults=max_results,
-                type="video"
+                type="video",
+                **kwargs
             )
             response = request.execute()
         except Exception as e:
@@ -30,13 +31,14 @@ class YoutubeClient:
         finally:
             service.close()
 
-    def get_comments(self, video_id: str, max_results: int = 100) -> dict:
+    def get_comments(self, video_id: str, max_results: int = 100, **kwargs) -> dict:
         service = self._service()
         try:
             request = service.commentThreads().list(
                 part="snippet",
                 videoId=video_id,
-                maxResults=max_results
+                maxResults=max_results,
+                **kwargs
             )
             response = request.execute()
         except Exception as e:
