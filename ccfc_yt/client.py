@@ -24,6 +24,24 @@ class YoutubeClient:
             response = request.execute()
         except Exception as e:
             logger.error(f"An error occured while searching: {e}")
+            raise
+        else:
+            return response
+        finally:
+            service.close()
+
+    def get_comments(self, video_id: str, max_results: int = 100) -> dict:
+        service = self._service()
+        try:
+            request = service.commentThreads().list(
+                part="snippet",
+                videoId=video_id,
+                maxResults=max_results
+            )
+            response = request.execute()
+        except Exception as e:
+            logger.error(f"An error occurred while fetching comments: {e}")
+            raise
         else:
             return response
         finally:
