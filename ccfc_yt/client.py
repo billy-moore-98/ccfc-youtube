@@ -1,50 +1,123 @@
 import logging
+import requests
 
-from googleapiclient.discovery import build
+from urllib3.util.retry import Retry
+from requests.adapters import HTTPAdapter
 
 logger = logging.getLogger(__name__)
 
+# Class built using bare requests module instead of google-api-python-client for maximum control and testability
+
 class YoutubeClient:
+    BASE_URL = "https://www.googleapis.com/youtube/v3"
 
     def __init__(self, api_key: str):
         self.api_key = api_key
-        
-    def _service(self):
-        return build("youtube", "v3", developerKey=self.api_key, static_discovery=False)
-    
-    def search(self, query: str, max_results: int = 10, **kwargs) -> dict:
-        service = self._service()
-        try:
-            request = service.search().list(
-                q=query,
-                part="snippet",
-                maxResults=max_results,
-                type="video",
-                **kwargs
-            )
-            response = request.execute()
-        except Exception as e:
-            logger.error(f"An error occured while searching: {e}")
-            raise
-        else:
-            return response
-        finally:
-            service.close()
+        if not self.api_key:
+            raise ValueError("API key must be provided")
+        self.session = self._create_session()
 
-    def get_comments(self, video_id: str, max_results: int = 100, **kwargs) -> dict:
-        service = self._service()
+    def _create_session(
+            self,
+            total_retries: int = 3,
+            backoff_factor: float = 0.5,
+            status_forcelist: list = [429, 500, 502, 503, 504]
+    ) -> requests.Session:
+        """Return a requests.Session object with a custom retry strategy for certain status codes"""
+        session = requests.Session()
+        retry_strategy = Retry(
+            total=total_retries,
+            backoff_factor=backoff_factor,
+            status_forcelist=status_forcelist,
+        )
+        http_adapter = HTTPAdapter(max_retries=retry_strategy)
+        session.mount("https://", http_adapter)
+        return session
+    
+    def _get_request(self, endpoint: str, params: dict = None) -> dict:
+        """Helper method to make GET requests to the YouTube API"""
+        url = f"{self.BASE_URL}/{endpoint}"
+        params["key"] = self.api_key
         try:
-            request = service.commentThreads().list(
-                part="snippet",
-                videoId=video_id,
-                maxResults=max_results,
-                **kwargs
-            )
-            response = request.execute()
+            logger.info(f"Making get request to {url} now")
+            response = self.session.get(url, params=params)
+            response.raise_for_status()
+            return response.json()
+        except requests.exceptions.HTTPError as e:
+            status_code = response.status_code
+            error_json = response.json()
+            if status_code == 403:
+                reason = error_json.get("error", {}).get("errors", [{}])[0].get("reason")
+                if reason == "quotaExceeded":
+                    raise ValueError("Quote exceeded for today. Try again tomorrow.")
+            else:
+                raise
         except Exception as e:
-            logger.error(f"An error occurred while fetching comments: {e}")
+            logger.error(f"Unknown error occurred: {e}")
             raise
+
+    def _paginate(self, endpoint: str, params: dict) -> list[dict]:
+        """Helper method to handle pagination"""
+        items = []
+        next_page_token = None
+        params['key'] = self.api_key
+        while True:
+            if next_page_token:
+                params['pageToken'] = next_page_token
+            response = self._get_request(endpoint, params)
+            items.extend(response.get("items", []))
+            next_page_token = response.get("nextPageToken")
+            if not next_page_token:
+                break
+        return items
+    
+    def get_videos_search(
+        self,
+        query: str,
+        max_results: int = 50,
+        paginate: bool = False,
+        optional_params: dict = None
+    ):
+        """
+        Conducts a youtube api search for videos based on a query string
+
+        :param query: the search query string
+        :param max_results: the maximum number of results to return (default 50)
+        :param paginate: whether to paginate through all results (default False)
+        :param optional_params: additional parameters to provide in the request
+        
+        :return: a list of search Resource items
+        """
+        endpoint = "search"
+        params = {
+            "part": "snippet",
+            "q": query,
+            "type": "video",
+            "maxResults": max_results
+        }
+        if optional_params:
+            params.update(optional_params)
+        if paginate:
+            return self._paginate(endpoint, params)
         else:
-            return response
-        finally:
-            service.close()
+            return self._get_request(endpoint, params).get("items", [])
+        
+    def get_comments_thread(
+        self,
+        video_id: str,
+        max_results: int = 50,
+        paginate: bool = False,
+        optional_params: dict = None
+    ) -> list[dict]:
+        endpoint = "commentThreads"
+        params = {
+            "part": "snippet",
+            "videoId": video_id,
+            "maxResults": max_results
+        }
+        if optional_params:
+            params.update(optional_params)
+        if paginate:
+            return self._paginate(endpoint, params)
+        else:
+            return self._get_request(endpoint, params).get("items", [])
