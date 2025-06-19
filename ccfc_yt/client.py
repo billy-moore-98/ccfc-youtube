@@ -111,6 +111,9 @@ class YoutubeClient:
         
         :return: a list of search Resource items
         """
+        if stream and not paginate:
+            raise ValueError("Cannot stream results without pagination")
+        
         endpoint = "search"
         params = {
             "part": "snippet",
@@ -146,6 +149,9 @@ class YoutubeClient:
 
         :return: a list of comment thread Resource items
         """
+        if stream and not paginate:
+            raise ValueError("Cannot stream results without pagination")
+        
         endpoint = "commentThreads"
         params = {
             "part": "snippet",

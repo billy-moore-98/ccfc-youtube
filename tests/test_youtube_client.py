@@ -57,6 +57,11 @@ def test_paginate(mock_client_get):
     assert len(items) == 2
     assert mock_client_get.call_count == 2
 
+def test_videos_search_stream_no_pagination():
+    client = YoutubeClient(api_key="VALID_KEY")
+    with pytest.raises(ValueError, match="Cannot stream results without pagination"):
+        client.get_videos_search(query="test", paginate=False, stream=True)
+
 @patch.object(YoutubeClient, '_get_request')
 def test_videos_search_get(mock_client_get):
     """Ensure get_videos_search without pagination returns expected data"""
