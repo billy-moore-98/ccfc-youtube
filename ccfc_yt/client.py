@@ -57,10 +57,9 @@ class YoutubeClient:
             raise
 
     def _paginate(self, endpoint: str, params: dict) -> list[dict]:
-        """Helper method to handle pagination"""
+        """Helper method to handle full pagination"""
         items = []
         next_page_token = None
-        params['key'] = self.api_key
         while True:
             logger.info(f"Paginating through results for endpoint: {endpoint}")
             if next_page_token:
@@ -76,20 +75,39 @@ class YoutubeClient:
         logger.info(f"Total items fetched: {len(items)}")
         return items
     
+    def _stream_paginate(self, endpoint: str, params: dict):
+        """Helper method to stream results from pagination"""
+        next_page_token = None
+        while True:
+            logger.info(f"Streaming results for endpoint: {endpoint}")
+            if next_page_token:
+                params['pageToken'] = next_page_token
+            response = self._get_request(endpoint, params)
+            logger.info(f"Response received, yielding items")
+            yield from response.get("items", [])
+            next_page_token = response.get("nextPageToken")
+            logger.info(f"Next page token: {next_page_token}")
+            if not next_page_token:
+                logger.info("No more pages to fetch, breaking loop")
+                break
+    
     def get_videos_search(
         self,
         query: str,
         max_results: int = 50,
+        optional_params: dict = None,
         paginate: bool = False,
-        optional_params: dict = None
+        stream: bool = False
     ):
         """
         Conducts a youtube api search for videos based on a query string
+        Several methods of pagination are supported
 
         :param query: the search query string
         :param max_results: the maximum number of results to return (default 50)
-        :param paginate: whether to paginate through all results (default False)
         :param optional_params: additional parameters to provide in the request
+        :param paginate: whether to paginate through all results (default False)
+        :param stream: whether to stream pages and act as a generator (default False)
         
         :return: a list of search Resource items
         """
@@ -102,7 +120,9 @@ class YoutubeClient:
         }
         if optional_params:
             params.update(optional_params)
-        if paginate:
+        if paginate and stream:
+            return self._stream_paginate(endpoint, params)
+        elif paginate:
             return self._paginate(endpoint, params)
         else:
             return self._get_request(endpoint, params).get("items", [])
@@ -111,9 +131,21 @@ class YoutubeClient:
         self,
         video_id: str,
         max_results: int = 50,
+        optional_params: dict = None,
         paginate: bool = False,
-        optional_params: dict = None
+        stream: bool = False
     ) -> list[dict]:
+        """
+        Fetches the comments thread for a given video ID
+
+        :param video_id: the ID of the video to fetch comments for
+        :param max_results: the maximum number of results to return (default 50)
+        :param optional_params: additional parameters to provide in the request
+        :param paginate: whether to paginate through all results (default False)
+        :param stream: whether to stream pages and act as a generator (default False)
+
+        :return: a list of comment thread Resource items
+        """
         endpoint = "commentThreads"
         params = {
             "part": "snippet",
@@ -122,7 +154,9 @@ class YoutubeClient:
         }
         if optional_params:
             params.update(optional_params)
-        if paginate:
+        if paginate and stream:
+            return self._stream_paginate(endpoint, params)
+        elif paginate:
             return self._paginate(endpoint, params)
         else:
             return self._get_request(endpoint, params).get("items", [])
