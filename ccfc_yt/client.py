@@ -39,7 +39,7 @@ class YoutubeClient:
         url = f"{self.BASE_URL}/{endpoint}"
         params["key"] = self.api_key
         try:
-            logger.info(f"Making get request to {url} now")
+            logger.info(f"Making get request to endpoint: {endpoint} now")
             response = self.session.get(url, params=params)
             response.raise_for_status()
             return response.json()
