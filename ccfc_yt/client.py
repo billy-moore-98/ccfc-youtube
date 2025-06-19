@@ -62,13 +62,18 @@ class YoutubeClient:
         next_page_token = None
         params['key'] = self.api_key
         while True:
+            logger.info(f"Paginating through results for endpoint: {endpoint}")
             if next_page_token:
                 params['pageToken'] = next_page_token
             response = self._get_request(endpoint, params)
+            logger.info(f"Response received, appending and checking for next page token")
             items.extend(response.get("items", []))
             next_page_token = response.get("nextPageToken")
+            logger.info(f"Next page token: {next_page_token}")
             if not next_page_token:
+                logger.info("No more pages to fetch, breaking loop")
                 break
+        logger.info(f"Total items fetched: {len(items)}")
         return items
     
     def get_videos_search(
