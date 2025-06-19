@@ -49,7 +49,7 @@ class YoutubeClient:
             if status_code == 403:
                 reason = error_json.get("error", {}).get("errors", [{}])[0].get("reason")
                 if reason == "quotaExceeded":
-                    raise ValueError("Quote exceeded for today. Try again tomorrow.")
+                    raise ValueError("Quota exceeded for today. Try again tomorrow.")
             else:
                 raise
         except Exception as e:
