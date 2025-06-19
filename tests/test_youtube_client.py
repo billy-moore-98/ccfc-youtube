@@ -56,3 +56,61 @@ def test_paginate(mock_client_get):
 
     assert len(items) == 2
     assert mock_client_get.call_count == 2
+
+@patch.object(YoutubeClient, '_get_request')
+def test_videos_search_get(mock_client_get):
+    """Ensure get_videos_search without pagination returns expected data"""
+    client = YoutubeClient(api_key="VALID_KEY")
+    mock_client_get.return_value = {
+        "id": "id1",
+        "part": "snippet",
+        "items": [{"id": "video1"}, {"id": "video"}]
+    }
+
+    results = client.get_videos_search(query="q", optional_params={"date": "start_date"}, paginate=False)
+
+    mock_client_get.assert_called_once_with(
+        "search",
+        {
+            "part": "snippet",
+            "q": "q",
+            "type": "video",
+            "maxResults": 50,
+            "date": "start_date"
+        }
+    )
+    assert results == [{"id": "video1"}, {"id": "video"}]
+
+@patch.object(YoutubeClient, '_paginate')
+def test_videos_search_paginate(mock_client_paginate):
+    """Ensure get_videos_search with pagination returns expected data"""
+    client = YoutubeClient(api_key="VALID_KEY")
+    mock_client_paginate.return_value = [
+        {
+            "id": "id1",
+            "part": "snippet",
+            "items": [{"id": "video1"}]
+        },
+        {
+            "id": "id2",
+            "part": "snippet",
+            "items": [{"id": "video2"}]
+        }
+    ]
+
+    results = client.get_videos_search(query="q", optional_params={"date": "start_date"}, paginate=True)
+
+    mock_client_paginate.assert_called_once_with(
+        "search",
+        {
+            "part": "snippet",
+            "q": "q",
+            "type": "video",
+            "maxResults": 50,
+            "date": "start_date"
+        }
+    )
+    assert results == [
+        {"id": "id1", "part": "snippet", "items": [{"id": "video1"}]},
+        {"id": "id2", "part": "snippet", "items": [{"id": "video2"}]}
+    ]
