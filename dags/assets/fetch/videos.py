@@ -70,17 +70,19 @@ def fetch_videos(
                     Key=s3_key,
                     ContentType="application/json"
                 )
+            # update state file with pages fetched
+            state["pagesFetched"] += 1
             # update state file with next page token
             next_page_token = page.get("nextPageToken")
             if next_page_token:
                 context.log.info(f"Next page required. Updating state with next page token: {next_page_token}")
                 state["nextPageToken"] = next_page_token
-                s3._client.put_object(
-                    Bucket="bmooreawsbucket",
-                    Body=json.dumps(state),
-                    Key=f"{s3_key_prefix}/state.json",
-                    ContentType="application/json"
-                )
+            s3._client.put_object(
+                Bucket="bmooreawsbucket",
+                Body=json.dumps(state),
+                Key=f"{s3_key_prefix}/state.json",
+                ContentType="application/json"
+            )
     except QuotaExceededError as e:
         # YouTube Data API quota resets at midnight PT
         # Schedule a retry for this time
