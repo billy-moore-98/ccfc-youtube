@@ -42,7 +42,8 @@ def fetch_videos(
     # setting request params
     optional_params = {
         "publishedAfter": published_after.strftime("%Y-%m-%dT%H:%M:%SZ"),
-        "publishedBefore":published_before.strftime("%Y-%m-%dT%H:%M:%SZ")
+        "publishedBefore":published_before.strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "order": "viewCount"
     }
     query = "coventry city fc"
     # set s3 key prefix
