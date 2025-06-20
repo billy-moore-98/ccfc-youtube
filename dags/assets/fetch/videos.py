@@ -109,7 +109,3 @@ def fetch_videos(
     except Exception as e:
         context.log.error(f"An unexpected error occured: {e}")
         raise
-
-@dg.asset
-def fetch_comments():
-    pass
