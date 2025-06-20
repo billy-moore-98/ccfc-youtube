@@ -1,0 +1,92 @@
+import dagster as dg
+import json
+
+from ccfc_yt.exceptions import QuotaExceededError
+from dags.assets.fetch.utils import append_comments_to_comments_file, get_videos_list, load_state_file
+from dags.resources import s3Resource, YtResource
+from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
+
+# set a monthly partition definition at the beginning of the 24/25 season
+monthly_partitions = dg.MonthlyPartitionsDefinition("2024-08-01")
+
+@dg.asset(partitions_def=monthly_partitions)
+def fetch_comments(
+    context: dg.AssetExecutionContext,
+    s3: s3Resource,
+    yt: YtResource
+):
+    """Fetches comments posted on relevant coventry city fc videos"""
+    # date partition formatting
+    date_partition = context.partition_key
+    partition_date_obj = datetime.strptime(date_partition, "%Y-%m-%d")
+    context.log.info(f"Fetching videos for partition: {date_partition}")
+    s3_partition_prefix = f"comments/year={partition_date_obj.year}/month={partition_date_obj.month}"
+    # setting request params
+    optional_params = {"order": "relevance"}
+    # pull list of video ids for partition
+    videos = get_videos_list(s3, partition_date_obj)
+    # loop through video ids
+    try:
+        for video in videos:
+            s3_key_prefix = f"{s3_partition_prefix}/video_id={video}"
+            # pull state file for video, initialise if not found
+            state = load_state_file(s3, "bmooreawsbucket", f"{s3_key_prefix}/state.json")
+            if not state:
+                state = {
+                    "videoId": video,
+                    "complete": False,
+                    "pagesFetched": 0,
+                    "nextPageToken": None
+                }
+            # go to next video if comment fetching already completed
+            if state["complete"]:
+                continue
+            for page in yt._client.get_comments_thread(
+                video_id=video,
+                max_results=20,
+                optional_params=optional_params,
+                paginate=True,
+                stream=True,
+                page_token=state.get("nextPageToken", None),
+                max_pages=(5-state["pagesFetched"])
+            ):
+                if not page["items"]:
+                    context.log.info(f"No comments for video id: {video}, continuing")
+                    continue
+                # TODO
+                # process comment and append to comments.jsonl file at s3 key
+                # store pages fetched and next page token in state
+                # if pages_fetched == 5 then mark as complete
+                append_comments_to_comments_file(
+                    s3=s3,
+                    bucket="bmooreawsbucket",
+                    key=f"{s3_key_prefix}/comments.jsonl",
+                    new_items=page["items"]
+                )
+                # update state file with pages fetched
+                state["pagesFetched"] += 1
+                # update state file with next page token
+                next_page_token = page.get("nextPageToken", None)
+                state["nextPageToken"] = next_page_token
+                # update state file completion
+                if not next_page_token or state["pagesFetched"] >= 5:
+                    state["complete"] = True
+                # update state file
+                s3._client.put_object(
+                    Bucket="bmooreawsbucket",
+                    Key=f"{s3_key_prefix}/state.json",
+                    Body=json.dumps(state),
+                    ContentType="application/json"
+                )
+    except QuotaExceededError as e:
+        # YouTube Data API quota resets at midnight PT
+        # Schedule a retry for this time
+        context.log.warning("YouTube API quota exceeded, scheduling retry for tomorrow")
+        now_pt = datetime.now(ZoneInfo("America/Los_Angeles"))
+        midnight_pt = now_pt.replace(hour=0, minute=0, second=0, microsecond=0) + timedelta(days=1)
+        seconds_to_wait = int((midnight_pt - now_pt).total_seconds())
+        raise dg.RetryRequested(max_retries=1, seconds_to_wait=seconds_to_wait) from e
+    except Exception as e:
+        context.log.error(f"An unexpected error occured: {e}")
+        raise
