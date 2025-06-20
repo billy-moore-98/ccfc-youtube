@@ -3,12 +3,12 @@ import os
 from dagster import Definitions, load_assets_from_modules
 from dotenv import load_dotenv
 
-from dags.assets.fetch import videos
+from dags.assets.fetch import comments, videos
 from dags.resources import s3Resource, YtResource
 
 load_dotenv()
 
-all_assets = load_assets_from_modules([videos])
+all_assets = load_assets_from_modules([comments, videos])
 
 defs = Definitions(
     assets=all_assets,
