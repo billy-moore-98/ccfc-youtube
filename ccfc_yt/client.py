@@ -111,7 +111,8 @@ class YoutubeClient:
         optional_params: dict = None,
         paginate: bool = False,
         stream: bool = False,
-        page_token: str = None
+        page_token: str = None,
+        max_pages: int = None
     ) -> Union[dict, list[dict], Generator[dict, None, None]]:
         """
         Conducts a youtube api search for videos based on a query string
@@ -138,9 +139,9 @@ class YoutubeClient:
         if optional_params:
             params.update(optional_params)
         if paginate and stream:
-            return self._stream_paginate(endpoint, params, page_token=page_token)
+            return self._stream_paginate(endpoint, params, page_token=page_token, max_pages=max_pages)
         elif paginate:
-            return self._paginate(endpoint, params)
+            return self._paginate(endpoint, params, max_pages=max_pages)
         else:
             return self._get_request(endpoint, params)
         
@@ -151,7 +152,8 @@ class YoutubeClient:
         optional_params: dict = None,
         paginate: bool = False,
         stream: bool = False,
-        page_token: str = None
+        page_token: str = None,
+        max_pages: int = None
     ) -> Union[dict, list[dict], Generator[dict, None, None]]:
         """
         Fetches the comments thread for a given video ID
@@ -176,8 +178,8 @@ class YoutubeClient:
         if optional_params:
             params.update(optional_params)
         if paginate and stream:
-            return self._stream_paginate(endpoint, params, page_token=page_token)
+            return self._stream_paginate(endpoint, params, page_token=page_token, max_pages=max_pages)
         elif paginate:
-            return self._paginate(endpoint, params)
+            return self._paginate(endpoint, params, max_pages=max_pages)
         else:
             return self._get_request(endpoint, params)
