@@ -4,6 +4,7 @@ setup(
     name="ccfc_yt_dags",
     packages=find_packages(exclude=["dags_tests"]),
     install_requires=[
+        "boto3",
         "dagster",
         "dagster-cloud",
         "pydantic",
