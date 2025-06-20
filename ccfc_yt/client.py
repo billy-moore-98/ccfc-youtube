@@ -1,8 +1,10 @@
 import logging
 import requests
 
-from urllib3.util.retry import Retry
+from ccfc_yt.exceptions import QuotaExceededError
 from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
+
 
 logger = logging.getLogger(__name__)
 
@@ -49,7 +51,7 @@ class YoutubeClient:
             if status_code == 403:
                 reason = error_json.get("error", {}).get("errors", [{}])[0].get("reason")
                 if reason == "quotaExceeded":
-                    raise ValueError("Quota exceeded for today. Try again tomorrow.")
+                    raise QuotaExceededError
             else:
                 raise
         except Exception as e:
