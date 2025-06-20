@@ -68,7 +68,7 @@ class YoutubeClient:
                 params['pageToken'] = next_page_token
             response = self._get_request(endpoint, params)
             logger.info(f"Response received, appending and checking for next page token")
-            items.extend(response.get("items", []))
+            items.extend(response)
             next_page_token = response.get("nextPageToken")
             logger.info(f"Next page token: {next_page_token}")
             if not next_page_token:
@@ -86,7 +86,7 @@ class YoutubeClient:
                 params['pageToken'] = next_page_token
             response = self._get_request(endpoint, params)
             logger.info(f"Response received, yielding items")
-            yield from response.get("items", [])
+            yield response
             next_page_token = response.get("nextPageToken")
             logger.info(f"Next page token: {next_page_token}")
             if not next_page_token:
@@ -130,7 +130,7 @@ class YoutubeClient:
         elif paginate:
             return self._paginate(endpoint, params)
         else:
-            return self._get_request(endpoint, params).get("items", [])
+            return self._get_request(endpoint, params)
         
     def get_comments_thread(
         self,
@@ -167,4 +167,4 @@ class YoutubeClient:
         elif paginate:
             return self._paginate(endpoint, params)
         else:
-            return self._get_request(endpoint, params).get("items", [])
+            return self._get_request(endpoint, params)
