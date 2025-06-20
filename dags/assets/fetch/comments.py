@@ -19,8 +19,8 @@ def fetch_comments(
     """Fetches comments posted on relevant coventry city fc videos"""
     # date partition formatting
     date_partition = context.partition_key
+    context.log.info(f"Fetching comments for partition: {date_partition}")
     partition_date_obj = datetime.strptime(date_partition, "%Y-%m-%d")
-    context.log.info(f"Fetching videos for partition: {date_partition}")
     s3_partition_prefix = f"comments/year={partition_date_obj.year}/month={partition_date_obj.month}"
     # setting request params
     optional_params = {"order": "relevance"}
