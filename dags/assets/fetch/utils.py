@@ -31,7 +31,7 @@ def get_videos_list(s3: s3Resource, partition: datetime) -> list[str]:
     for page in paginator.paginate(Bucket="bmooreawsbucket", Prefix=s3_partition_prefix):
         for obj in page.get("Contents", []):
             key = obj["Key"]
-            match = re.match(r"video_id=(.+?)\.json$", key)
+            match = re.search(r"video_id=(.+?)\.json$", key)
             if match:
                 video_ids.append(match.group(1))
     return video_ids
