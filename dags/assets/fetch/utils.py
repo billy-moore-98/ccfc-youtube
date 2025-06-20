@@ -7,12 +7,12 @@ from datetime import datetime
 from dags.resources import s3Resource
 
 # helper function to return end of month date from start of month partition
-def _get_end_of_month(first_day: datetime) -> datetime:
+def get_end_of_month(first_day: datetime) -> datetime:
     last_day_num = calendar.monthrange(first_day.year, first_day.month)[1]
     return first_day.replace(day=last_day_num)
 
 # helper function to safely load state file
-def _load_state_file(s3: s3Resource, bucket: str, s3_key: str) -> dict:
+def load_state_file(s3: s3Resource, bucket: str, s3_key: str) -> dict:
     try:
         response = s3._client.get_object(Bucket=bucket, Key=s3_key)
         return json.loads(response["Body"].read().decode("utf-8"))
@@ -22,7 +22,7 @@ def _load_state_file(s3: s3Resource, bucket: str, s3_key: str) -> dict:
         else:
             raise e
 
-def _get_videos_list(s3: s3Resource, partition: datetime) -> list[str]:
+def get_videos_list(s3: s3Resource, partition: datetime) -> list[str]:
     video_ids = []
     paginator = s3._client.get_paginator("list_objects_v2")
     s3_partition_prefix = f"comments/year={partition.year}/month={partition.month}"

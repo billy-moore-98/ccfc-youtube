@@ -2,7 +2,7 @@ import dagster as dg
 import json
 
 from ccfc_yt.exceptions import QuotaExceededError
-from dags.assets.fetch.utils import _get_end_of_month, _load_state_file
+from dags.assets.fetch.utils import get_end_of_month, load_state_file
 from dags.resources import s3Resource, YtResource
 from datetime import datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
@@ -21,7 +21,7 @@ def fetch_videos(
     date_partition = context.partition_key
     context.log.info(f"Fetching videos for partition: {date_partition}")
     published_after = datetime.strptime(date_partition, "%Y-%m-%d").replace(tzinfo=timezone.utc)
-    published_before = _get_end_of_month(published_after)
+    published_before = get_end_of_month(published_after)
     # setting request params
     optional_params = {
         "publishedAfter": published_after.strftime("%Y-%m-%dT%H:%M:%SZ"),
@@ -33,7 +33,7 @@ def fetch_videos(
     s3_key_prefix = f"videos/year={published_after.year}/month={published_after.month}"
     # load state file if exists, populate if it doesn't
     context.log.info(f"Loading state now from : {s3_key_prefix}/state.json")
-    state = _load_state_file(s3, "bmooreawsbucket", s3_key_prefix+"/state.json")
+    state = load_state_file(s3, "bmooreawsbucket", s3_key_prefix+"/state.json")
     if not state:
         context.log.info("State file not found, initializing now")
         state = {
