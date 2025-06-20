@@ -4,7 +4,7 @@ from dagster import Definitions, load_assets_from_modules
 from dotenv import load_dotenv
 
 from dags import assets
-from dags.resources import s3, Yt
+from dags.resources import s3Resource, YtResource
 
 load_dotenv()
 
@@ -13,8 +13,8 @@ all_assets = load_assets_from_modules([assets])
 defs = Definitions(
     assets=all_assets,
     resources={
-        "yt": Yt(key=os.getenv("YOUTUBE_API_KEY")),
-        "s3": s3(
+        "yt": YtResource(key=os.getenv("YOUTUBE_API_KEY")),
+        "s3": s3Resource(
             access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
             secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY")
         )

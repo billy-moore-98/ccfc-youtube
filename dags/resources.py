@@ -4,7 +4,7 @@ import dagster as dg
 from ccfc_yt.client import YoutubeClient
 from pydantic import PrivateAttr
 
-class Yt(dg.ConfigurableResource):
+class YtResource(dg.ConfigurableResource):
     key: str
     _client: YoutubeClient = PrivateAttr() # Private attribute ignored by pydantic to hold the YoutubeClient instance
 
@@ -12,7 +12,7 @@ class Yt(dg.ConfigurableResource):
         super().__init__(**data)
         self._client = YoutubeClient(api_key=self.key)  # Create API client so we can access it in assets
 
-class s3(dg.ConfigurableResource):
+class s3Resource(dg.ConfigurableResource):
     access_key_id: str
     secret_access_key: str
     _client: boto3.client = PrivateAttr()
