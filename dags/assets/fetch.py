@@ -60,7 +60,8 @@ def fetch_videos(
             "nextPageToken": None,
             "pagesFetched": 5
         }
-    # begin fetch
+    # begin fetch for maximum of 5 pages for project deployment
+    # in production can expand this for all videos if necessary
     context.log.info("Beginning video fetch")
     try:
         for page in yt._client.get_videos_search(
