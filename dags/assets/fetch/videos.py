@@ -73,10 +73,9 @@ def fetch_videos(
             # update state file with pages fetched
             state["pagesFetched"] += 1
             # update state file with next page token
-            next_page_token = page.get("nextPageToken")
-            if next_page_token:
-                context.log.info(f"Next page required. Updating state with next page token: {next_page_token}")
-                state["nextPageToken"] = next_page_token
+            next_page_token = page.get("nextPageToken", None)
+            state["nextPageToken"] = next_page_token
+            # update state file
             s3._client.put_object(
                 Bucket="bmooreawsbucket",
                 Body=json.dumps(state),
