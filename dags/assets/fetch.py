@@ -57,17 +57,20 @@ def fetch_videos(
             "partition": date_partition,
             "publishedAfter": published_after.strftime("%Y-%m-%dT%H:%M:%SZ"),
             "publishedBefore": published_before.strftime("%Y-%m-%dT%H:%M:%SZ"),
-            "nextPageToken": None
+            "nextPageToken": None,
+            "pagesFetched": 5
         }
     # begin fetch
     context.log.info("Beginning video fetch")
     try:
         for page in yt._client.get_videos_search(
             query=query,
+            max_results=10,
             optional_params=optional_params,
             stream=True,
             paginate=True,
-            page_token=state.get("nextPageToken", None)
+            page_token=state.get("nextPageToken", None),
+            max_pages=5
         ):
             context.log.info(f"Processing page with {len(page.get('items', []))} items")
             items = page.get("items", [])
