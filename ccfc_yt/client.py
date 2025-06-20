@@ -3,6 +3,7 @@ import requests
 
 from ccfc_yt.exceptions import QuotaExceededError
 from requests.adapters import HTTPAdapter
+from typing import Generator, Union
 from urllib3.util.retry import Retry
 
 
@@ -77,7 +78,7 @@ class YoutubeClient:
         logger.info(f"Total items fetched: {len(items)}")
         return items
     
-    def _stream_paginate(self, endpoint: str, params: dict, page_token: str = None):
+    def _stream_paginate(self, endpoint: str, params: dict, page_token: str = None) -> Generator[dict, None, None]:
         """Helper method to stream results from pagination"""
         next_page_token = page_token
         while True:
@@ -101,7 +102,7 @@ class YoutubeClient:
         paginate: bool = False,
         stream: bool = False,
         page_token: str = None
-    ):
+    ) -> Union[dict, list[dict], Generator[dict, None, None]]:
         """
         Conducts a youtube api search for videos based on a query string
         Several methods of pagination are supported
@@ -141,7 +142,7 @@ class YoutubeClient:
         paginate: bool = False,
         stream: bool = False,
         page_token: str = None
-    ) -> list[dict]:
+    ) -> Union[dict, list[dict], Generator[dict, None, None]]:
         """
         Fetches the comments thread for a given video ID
 
