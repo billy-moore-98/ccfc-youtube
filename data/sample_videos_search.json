@@ -1,0 +1,46 @@
+{
+  "kind": "youtube#searchListResponse",
+  "etag": "YtC_IYLzGbQdB7bpUrhi9YGbcOY",
+  "nextPageToken": "CAEQAA",
+  "regionCode": "GB",
+  "pageInfo": {
+    "totalResults": 1000000,
+    "resultsPerPage": 1
+  },
+  "items": [
+    {
+      "kind": "youtube#searchResult",
+      "etag": "zfVT8niGJyeDDG7R7EOVs7S9Ehk",
+      "id": {
+        "kind": "youtube#video",
+        "videoId": "p9-rCEqUoyE"
+      },
+      "snippet": {
+        "publishedAt": "2025-06-19T17:25:30Z",
+        "channelId": "UCTTRunk5OyHMMbSW5N5yjrA",
+        "title": "Coventry City Sign Miguel \u00c1ngel Brau",
+        "description": "",
+        "thumbnails": {
+          "default": {
+            "url": "https://i.ytimg.com/vi/p9-rCEqUoyE/default.jpg",
+            "width": 120,
+            "height": 90
+          },
+          "medium": {
+            "url": "https://i.ytimg.com/vi/p9-rCEqUoyE/mqdefault.jpg",
+            "width": 320,
+            "height": 180
+          },
+          "high": {
+            "url": "https://i.ytimg.com/vi/p9-rCEqUoyE/hqdefault.jpg",
+            "width": 480,
+            "height": 360
+          }
+        },
+        "channelTitle": "Alex Craig",
+        "liveBroadcastContent": "none",
+        "publishTime": "2025-06-19T17:25:30Z"
+      }
+    }
+  ]
+}
