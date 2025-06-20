@@ -3,8 +3,8 @@ import os
 from dagster import Definitions, load_assets_from_modules
 from dotenv import load_dotenv
 
-from ccfc_yt_dags import assets
-from ccfc_yt_dags.resources import s3, Yt
+from dags import assets
+from dags.resources import s3, Yt
 
 load_dotenv()
 

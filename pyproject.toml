@@ -1,7 +1,7 @@
 [project]
-name = "ccfc_yt_dags"
+name = "ccfc_yt"
 version = "0.1.0"
-description = "Add your description here"
+description = "Data pipeline project performing sentiment analysis on YouTube comments related to Coventry City FC"
 readme = "README.md"
 requires-python = ">=3.9,<3.13"
 dependencies = [
@@ -21,8 +21,8 @@ requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
 [tool.dagster]
-module_name = "ccfc_yt_dags.definitions"
-code_location_name = "ccfc_yt_dags"
+module_name = "dags.definitions"
+code_location_name = "dags"
 
 [tool.setuptools.packages.find]
-exclude=["ccfc_yt_dags_tests"]
+exclude=["dags_tests"]
