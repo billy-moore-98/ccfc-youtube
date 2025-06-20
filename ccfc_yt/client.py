@@ -59,11 +59,15 @@ class YoutubeClient:
             logger.error(f"Unknown error occurred: {e}")
             raise
 
-    def _paginate(self, endpoint: str, params: dict) -> list[dict]:
+    def _paginate(self, endpoint: str, params: dict, max_pages: int = None) -> list[dict]:
         """Helper method to handle full pagination"""
         items = []
         next_page_token = None
+        page_count = 0
         while True:
+            if max_pages is not None and page_count >= max_pages:
+                logger.info(f"Max pages reaches, stopping pagination")
+                break
             logger.info(f"Paginating through results for endpoint: {endpoint}")
             if next_page_token:
                 params['pageToken'] = next_page_token
@@ -72,16 +76,21 @@ class YoutubeClient:
             items.extend(response)
             next_page_token = response.get("nextPageToken")
             logger.info(f"Next page token: {next_page_token}")
+            page_count += 1
             if not next_page_token:
                 logger.info("No more pages to fetch, breaking loop")
                 break
         logger.info(f"Total items fetched: {len(items)}")
         return items
     
-    def _stream_paginate(self, endpoint: str, params: dict, page_token: str = None) -> Generator[dict, None, None]:
+    def _stream_paginate(self, endpoint: str, params: dict, page_token: str = None, max_pages: int = None) -> Generator[dict, None, None]:
         """Helper method to stream results from pagination"""
         next_page_token = page_token
+        page_count = 0
         while True:
+            if max_pages is not None and page_count >= max_pages:
+                logger.info(f"Max pages reached, stopping pagination")
+                break
             logger.info(f"Streaming results for endpoint: {endpoint}")
             if next_page_token:
                 params['pageToken'] = next_page_token
@@ -90,6 +99,7 @@ class YoutubeClient:
             yield response
             next_page_token = response.get("nextPageToken")
             logger.info(f"Next page token: {next_page_token}")
+            page_count += 1
             if not next_page_token:
                 logger.info("No more pages to fetch, breaking loop")
                 break
