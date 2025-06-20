@@ -26,13 +26,16 @@ def fetch_comments(
     optional_params = {"order": "relevance"}
     # pull list of video ids for partition
     videos = get_videos_list(s3, partition_date_obj)
+    context.log.info(f"Beginning comments fetch for {len(videos)} videos")
     # loop through video ids
     try:
         for video in videos:
             s3_key_prefix = f"{s3_partition_prefix}/video_id={video}"
             # pull state file for video, initialise if not found
+            context.log.info(f"Loading state now from : {s3_key_prefix}/state.json")
             state = load_state_file(s3, "bmooreawsbucket", f"{s3_key_prefix}/state.json")
             if not state:
+                context.log.info("State file not found, initializing now")
                 state = {
                     "videoId": video,
                     "complete": False,
@@ -54,10 +57,9 @@ def fetch_comments(
                 if not page["items"]:
                     context.log.info(f"No comments for video id: {video}, continuing")
                     continue
-                # TODO
+                context.log.info(f"Processing page with {len(page.get('items', []))} items for video id: {video}")
                 # process comment and append to comments.jsonl file at s3 key
-                # store pages fetched and next page token in state
-                # if pages_fetched == 5 then mark as complete
+                context.log.info(f"Uploading {len(page['items'])} comments for video id: {video} to S3 at {s3_key_prefix}/comments.jsonl")
                 append_comments_to_comments_file(
                     s3=s3,
                     bucket="bmooreawsbucket",
@@ -73,6 +75,7 @@ def fetch_comments(
                 if not next_page_token or state["pagesFetched"] >= 5:
                     state["complete"] = True
                 # update state file
+                context.log.info(f"Updating state file for video id: {video} at {s3_key_prefix}/state.json")
                 s3._client.put_object(
                     Bucket="bmooreawsbucket",
                     Key=f"{s3_key_prefix}/state.json",
