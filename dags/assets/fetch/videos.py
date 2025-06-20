@@ -78,7 +78,7 @@ def fetch_videos(
             # update state file
             s3._client.put_object(
                 Bucket="bmooreawsbucket",
-                Body=json.dumps(state),
+                Body=json.dumps(state).encode("utf-8"),
                 Key=f"{s3_key_prefix}/state.json",
                 ContentType="application/json"
             )
