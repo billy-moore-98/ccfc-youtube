@@ -1,31 +1,14 @@
-import botocore.exceptions
-import calendar
 import dagster as dg
 import json
 
 from ccfc_yt.exceptions import QuotaExceededError
+from dags.assets.fetch.utils import _get_end_of_month, _load_state_file
 from dags.resources import s3Resource, YtResource
 from datetime import datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
 
 # set a monthly partition definition at the beginning of the 24/25 season
 monthly_partitions = dg.MonthlyPartitionsDefinition("2024-08-01")
-
-# helper function to return end of month date from start of month partition
-def _get_end_of_month(first_day: datetime) -> datetime:
-    last_day_num = calendar.monthrange(first_day.year, first_day.month)[1]
-    return first_day.replace(day=last_day_num)
-
-# helper function to safely load state file
-def _load_state_file(s3: s3Resource, bucket: str, s3_key: str) -> dict:
-    try:
-        response = s3._client.get_object(Bucket=bucket, Key=s3_key)
-        return json.loads(response["Body"].read().decode("utf-8"))
-    except botocore.exceptions.ClientError as e:
-        if e.response["Error"]["Code"] == "NoSuchKey":
-            return {}
-        else:
-            raise e
 
 @dg.asset(partitions_def=monthly_partitions)
 def fetch_videos(
