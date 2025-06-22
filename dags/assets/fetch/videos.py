@@ -42,7 +42,7 @@ def fetch_videos(
             "publishedAfter": published_after.strftime("%Y-%m-%dT%H:%M:%SZ"),
             "publishedBefore": published_before.strftime("%Y-%m-%dT%H:%M:%SZ"),
             "nextPageToken": None,
-            "pagesFetched": 5
+            "pagesFetched": 0
         }
     # begin fetch for maximum of 5 pages for project deployment
     # in production can expand this for all videos if necessary
@@ -55,7 +55,7 @@ def fetch_videos(
             stream=True,
             paginate=True,
             page_token=state.get("nextPageToken", None),
-            max_pages=5 # 10 results * 5 pages returns 50 videos, a good amount per month
+            max_pages=(5-state["pagesFetched"]) # 10 results * 5 pages returns 50 videos, a good amount per month
         ):
             context.log.info(f"Processing page with {len(page.get('items', []))} items")
             items = page.get("items", [])
