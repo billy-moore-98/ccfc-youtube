@@ -9,9 +9,10 @@ from typing import Dict, List, Union
 class Processor:
     """Methods to flatten and clean the YouTube comments json responses"""
     EXTRACT_COLS = [
+        "snippet.videoId",
+        "snippet.channelId",
         "snippet.topLevelComment.id",
-        "snippet.topLevelComment.snippet.videoId",
-        "snippet.topLevelComment.snippet.channelId",
+        "snippet.topLevelComment.snippet.authorChannelId.value",
         "snippet.topLevelComment.snippet.textDisplay",
         "snippet.topLevelComment.snippet.textOriginal",
         "snippet.topLevelComment.snippet.likeCount",
@@ -20,9 +21,10 @@ class Processor:
         "snippet.totalReplyCount"
     ]
     RENAME_MAPPING = {
+        "snippet.videoId": "video_id",
+        "snippet.channelId": "video_channel_id",
         "snippet.topLevelComment.id": "comment_id",
-        "snippet.topLevelComment.snippet.videoId": "video_id",
-        "snippet.topLevelComment.snippet.channelId": "channel_id",
+        "snippet.topLevelComment.snippet.authorChannelId.value": "comment_author_id",
         "snippet.topLevelComment.snippet.textDisplay": "text_display",
         "snippet.topLevelComment.snippet.textOriginal": "text_original",
         "snippet.topLevelComment.snippet.likeCount": "like_count",
@@ -30,7 +32,6 @@ class Processor:
         "snippet.canReply": "can_reply",
         "snippet.totalReplyCount": "total_reply_count",
     }
-
     
     def clean_html(self, text: str) -> str:
         """Remove html tags and convert character references from an input string"""
