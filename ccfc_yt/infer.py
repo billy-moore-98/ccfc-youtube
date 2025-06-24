@@ -44,7 +44,7 @@ class OpenRouterAsyncClient:
     
     async def chat_completion(self, model: str, messages_batch: List[Dict]) -> None:
         """
-        Post requests to the chat completion OpenRouter endpoint asynchronously
+        Take an input of comments and infer sentiment using the specified model with async requests
 
         :param model: the LLM model to use
         :param messages_batch: the batch of LLM message prompts with associated comment_id
