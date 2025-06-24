@@ -81,8 +81,17 @@ class OpenRouterAsyncClient:
             )
             # append response with associated comment_id
             for (comment_id, _), res in zip(tasks, responses):
-                results.append({
-                    "comment_id": comment_id,
-                    "response": res
-                })
+                if isinstance(res, Exception):
+                    logger.error(f"Request failed for comment id: {comment_id}")
+                    results.append({
+                        "comment_id": comment_id,
+                        "response": None,
+                        "error": str(res)
+                    })
+                else:
+                    results.append({
+                        "comment_id": comment_id,
+                        "response": res,
+                        "error": None
+                    })
             return results
