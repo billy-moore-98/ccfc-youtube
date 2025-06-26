@@ -20,7 +20,9 @@ def filter_for_relevant_comments(df: pd.DataFrame, column: str) -> pd.DataFrame:
         "sheaf",
         "sakamoto",
         "bidwell",
-        "eccles"
+        "eccles",
+        "robins",
+        "mark"
     ]
     df = df[
         df[column].str.lower().apply(
