@@ -45,11 +45,3 @@ def process_llm_responses(responses: List[Dict]) -> List[Dict]:
         except json.decoder.JSONDecodeError as e:
             print(f"JSONDecodeError for comment: {response["comment_id"]}, string: {raw_content}")
     return sentiments
-
-def write_sentiment_df_to_parquet(df: pd.DataFrame, partition_on: List[str], s3_key_prefix: str) -> None:
-    df.to_parquet(
-        f"s3://bmooreawsbucket/{s3_key_prefix}/",
-        engine="pyarrow",
-        index=False,
-        partition_cols=partition_on
-    )
