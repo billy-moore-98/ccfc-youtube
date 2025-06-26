@@ -40,7 +40,7 @@ def process_comments(context: dg.AssetExecutionContext, s3: s3Resource):
     buffer = io.StringIO()
     all_comments.to_json(buffer, orient="records", lines=True, force_ascii=False)
     buffer.seek(0)
-    destination_key = f"processed/year={partition_key_dt.year}/{partition_key_dt.month}/comments.jsonl"
+    destination_key = f"processed/year={partition_key_dt.year}/month={partition_key_dt.month}/comments.jsonl"
     context.log.info("Uploading processed comments to s3")
     s3._client.put_object(
         Bucket="bmooreawsbucket",
