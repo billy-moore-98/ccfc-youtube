@@ -5,6 +5,7 @@ import os
 import pandas as pd
 
 from ccfc_yt.infer import OpenRouterAsyncClient
+from dags.assets.infer import utils, validate
 from dags.resources import s3Resource
 from datetime import datetime
 
@@ -20,27 +21,8 @@ async def comments_sentiment_inference(context: dg.AssetExecutionContext, s3: s3
     context.log.info(f"Downloading comments data for {partition_dt} now")
     s3_key = f"s3://bmooreawsbucket/processed/year={partition_dt.year}/month={partition_dt.month}/comments.jsonl"
     df = pd.read_json(s3_key, orient="records", lines=True)
-    keywords = [
-        "coventry",
-        "pusb",
-        "ccfc",
-        "sky blues",
-        "sky blue",
-        "cbs",
-        "arena",
-        "lampard",
-        "wright",
-        "sheaf",
-        "sakamoto",
-        "bidwell",
-        "eccles"
-    ]
     context.log.info(f"Filtering df for keywords to reduce noise")
-    df = df[
-        df["text_display_cleaned"].str.lower().apply(
-            lambda text: any(kw in text for kw in keywords)
-        )
-    ].head(100)
+    df = utils.filter_for_relevant_comments(df, "text_display_cleaned")
     comments = df["text_display_cleaned"].to_list()
     comment_ids = df["comment_id"].to_list()
     assert len(comments) == len(comment_ids), "comments and comment_ids lists are not the same length"
@@ -75,32 +57,15 @@ async def comments_sentiment_inference(context: dg.AssetExecutionContext, s3: s3
     results = await ai_client.chat_completion("openai/gpt-4.1-nano", messages_batch=comment_messages_batch)
     context.log.info("Async request finished")
     context.log.info("Processing and merging sentiment responses to df")
-    sentiments = []
-    context.log.info(f"Example result: {results[0]}")
-    for result in results:
-        if not result["error"]:
-            try:
-                raw_content = result["response"]["choices"][0]["message"]["content"]
-                cleaned = raw_content.strip()
-
-                # Optionally validate the JSON with a regex or check
-                parsed = json.loads(cleaned)
-
-                sentiments.append({
-                    "comment_id": result["comment_id"],
-                    "sentiment": parsed["sentiment"],
-                    "confidence": parsed["confidence"]
-                })
-            except json.decoder.JSONDecodeError as e:
-                context.log.error("JSON decode error occurred")
-                context.log.error(f"Raw content was: {repr(raw_content)}")
-                context.log.error(f"Result set is: {result}")
-                raise
+    sentiments = utils.process_llm_responses(results)
     sentiments_df = pd.DataFrame(sentiments)
-    final = pd.merge(df, sentiments_df, on="comment_id")
-    buffer = io.StringIO()
-    final.to_csv(buffer, index=False)
-    buffer.seek(0)
-    context.log.info("Uploading df to s3 now")
-    s3._client.put_object(Bucket="bmooreawsbucket", Key=f"sentiment/{partition_dt.strftime("%Y%m")}_sentiment.csv", Body=buffer.getvalue())
-    context.log.info("Asset materialised")
+    final_df = pd.merge(df, sentiments_df, on="comment_id")
+    validate.schema.validate(final_df)
+    final_df["year"] = final_df["published_at"].dt.year
+    final_df["month"] = final_df["published_at"].dt.month
+    final_df.to_parquet(
+        "s3://bmooreawsbucket/sentiment/",
+        engine="pyarrow",
+        index=False,
+        parition_cols=["year", "month"]
+    )
