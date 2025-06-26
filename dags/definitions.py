@@ -3,15 +3,15 @@ import os
 from dagster import Definitions, load_assets_from_modules
 from dotenv import load_dotenv
 
-from dags.assets import process
+from dags.assets import infer, process
 from dags.assets.fetch import comments, videos
-from dags.jobs import process_comments_job
+from dags.jobs import comments_sentiment_analysis
 from dags.resources import s3Resource, YtResource
-from dags.sensors import fetch_comments_sensor
+from dags.schedules import monthly_schedule
 
 load_dotenv()
 
-all_assets = load_assets_from_modules([comments, process, videos])
+all_assets = load_assets_from_modules([comments, infer, process, videos])
 
 defs = Definitions(
     assets=all_assets,
@@ -22,6 +22,6 @@ defs = Definitions(
             secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY")
         )
     },
-    jobs=[process_comments_job],
-    sensors=[fetch_comments_sensor]
+    jobs=[comments_sentiment_analysis],
+    schedules=[monthly_schedule]
 )

@@ -10,7 +10,12 @@ from datetime import datetime
 class ProcessConfig(dg.Config):
     partition_dt: str
 
-@dg.asset
+monthly_partitions = dg.MonthlyPartitionsDefinition("2024-08-01")
+
+@dg.asset(
+    partitions_def=monthly_partitions,
+    deps=[dg.AssetKey("fetch_comments")]
+)
 def process_comments(context: dg.AssetExecutionContext, config: ProcessConfig, s3: s3Resource):
     processor = Processor()
     dfs = []

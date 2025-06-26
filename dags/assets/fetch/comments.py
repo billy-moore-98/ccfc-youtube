@@ -10,7 +10,10 @@ from zoneinfo import ZoneInfo
 # set a monthly partition definition at the beginning of the 24/25 season
 monthly_partitions = dg.MonthlyPartitionsDefinition("2024-08-01")
 
-@dg.asset(partitions_def=monthly_partitions)
+@dg.asset(
+    partitions_def=monthly_partitions,
+    deps=[dg.AssetKey("fetch_videos")]
+)
 def fetch_comments(
     context: dg.AssetExecutionContext,
     s3: s3Resource,
