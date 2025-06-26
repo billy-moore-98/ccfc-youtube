@@ -6,20 +6,16 @@ from ccfc_yt.processor import Processor
 from dags.resources import s3Resource
 from datetime import datetime
 
-# define ProcessConfig to hold the partition of the upstream fetch_comments partition
-class ProcessConfig(dg.Config):
-    partition_dt: str
-
 monthly_partitions = dg.MonthlyPartitionsDefinition("2024-08-01")
 
 @dg.asset(
     partitions_def=monthly_partitions,
     deps=[dg.AssetKey("fetch_comments")]
 )
-def process_comments(context: dg.AssetExecutionContext, config: ProcessConfig, s3: s3Resource):
+def process_comments(context: dg.AssetExecutionContext, s3: s3Resource):
     processor = Processor()
     dfs = []
-    partition_key_dt = datetime.strptime(config.partition_dt, "%Y-%m-%d")
+    partition_key_dt = datetime.strptime(context.partition_key, "%Y-%m-%d")
     # formulate key prefix for month partition
     s3_key_prefix = f"raw/comments/year={partition_key_dt.year}/month={partition_key_dt.month}"
     context.log.info(f"Processing comments for partition {partition_key_dt.date} now")
