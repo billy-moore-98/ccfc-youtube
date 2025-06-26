@@ -16,7 +16,7 @@ def process_comments(context: dg.AssetExecutionContext, config: ProcessConfig, s
     dfs = []
     partition_key_dt = datetime.strptime(config.partition_dt, "%Y-%m-%d")
     # formulate key prefix for month partition
-    s3_key_prefix = f"comments/year={partition_key_dt.year}/month={partition_key_dt.month}"
+    s3_key_prefix = f"raw/comments/year={partition_key_dt.year}/month={partition_key_dt.month}"
     context.log.info(f"Processing comments for partition {partition_key_dt.date} now")
     context.log.info(f"s3 key prefix is {s3_key_prefix}, listing objects now")
     # list s3 objects for partition
@@ -39,7 +39,7 @@ def process_comments(context: dg.AssetExecutionContext, config: ProcessConfig, s
     buffer = io.StringIO()
     all_comments.to_json(buffer, orient="records", lines=True, force_ascii=False)
     buffer.seek(0)
-    destination_key = f"processed/{partition_key_dt.strftime("%Y%m")}_comments.jsonl"
+    destination_key = f"processed/year={partition_key_dt.year}/{partition_key_dt.month}/comments.jsonl"
     context.log.info("Uploading processed comments to s3")
     s3._client.put_object(
         Bucket="bmooreawsbucket",

@@ -30,7 +30,7 @@ def fetch_videos(
     }
     query = "coventry city fc"
     # set s3 key prefix
-    s3_key_prefix = f"videos/year={published_after.year}/month={published_after.month}"
+    s3_key_prefix = f"raw/videos/year={published_after.year}/month={published_after.month}"
     # load state file if exists, populate if it doesn't
     context.log.info(f"Loading state now from : {s3_key_prefix}/state.json")
     state = load_state_file(s3, "bmooreawsbucket", s3_key_prefix+"/state.json")

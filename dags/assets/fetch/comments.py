@@ -21,7 +21,7 @@ def fetch_comments(
     date_partition = context.partition_key
     context.log.info(f"Fetching comments for partition: {date_partition}")
     partition_date_obj = datetime.strptime(date_partition, "%Y-%m-%d")
-    s3_partition_prefix = f"comments/year={partition_date_obj.year}/month={partition_date_obj.month}"
+    s3_partition_prefix = f"raw/comments/year={partition_date_obj.year}/month={partition_date_obj.month}"
     # setting request params
     optional_params = {"order": "relevance"}
     # pull list of video ids for partition

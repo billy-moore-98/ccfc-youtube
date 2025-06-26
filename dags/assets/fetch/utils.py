@@ -27,7 +27,7 @@ def load_state_file(s3: s3Resource, bucket: str, s3_key: str) -> dict:
 def get_videos_list(s3: s3Resource, partition: datetime) -> list[str]:
     video_ids = []
     paginator = s3._client.get_paginator("list_objects_v2")
-    s3_partition_prefix = f"videos/year={partition.year}/month={partition.month}"
+    s3_partition_prefix = f"raw/videos/year={partition.year}/month={partition.month}"
     for page in paginator.paginate(Bucket="bmooreawsbucket", Prefix=s3_partition_prefix):
         for obj in page.get("Contents", []):
             key = obj["Key"]
