@@ -55,7 +55,7 @@ def fetch_comments(
                 paginate=True,
                 stream=True,
                 page_token=state.get("nextPageToken", None),
-                max_pages=(5-state["pagesFetched"])
+                max_pages=(5-state["pagesFetched"]) # 20 results * 5 pages = max 100 comments per video
             ):
                 if not page["items"]:
                     context.log.info(f"No comments for video id: {video}, continuing")

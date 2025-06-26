@@ -50,12 +50,12 @@ def fetch_videos(
     try:
         for page in yt._client.get_videos_search(
             query=query,
-            max_results=10, # limit number of results for project deployment
+            max_results=20, # limit number of results for project deployment
             optional_params=optional_params,
             stream=True,
             paginate=True,
             page_token=state.get("nextPageToken", None),
-            max_pages=(5-state["pagesFetched"]) # 10 results * 5 pages returns 50 videos, a good amount per month
+            max_pages=(5-state["pagesFetched"]) # 20 results * 5 pages returns 100 videos, a good amount per month
         ):
             context.log.info(f"Processing page with {len(page.get('items', []))} items")
             items = page.get("items", [])
