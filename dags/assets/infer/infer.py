@@ -67,5 +67,5 @@ async def comments_sentiment_inference(context: dg.AssetExecutionContext, s3: s3
         "s3://bmooreawsbucket/sentiment/",
         engine="pyarrow",
         index=False,
-        parition_cols=["year", "month"]
+        partition_cols=["year", "month"]
     )
