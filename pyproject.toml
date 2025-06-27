@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.9,<3.13"
 dependencies = [
     "aiohttp",
+    "backoff",
     "boto3",
     "dagster",
     "dagster-cloud",

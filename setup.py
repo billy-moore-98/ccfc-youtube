@@ -5,6 +5,7 @@ setup(
     packages=find_packages(exclude=["dags_tests"]),
     install_requires=[
         "aiohttp",
+        "backoff",
         "boto3",
         "dagster",
         "dagster-cloud",
