@@ -5,11 +5,14 @@ description = "Data pipeline project performing sentiment analysis on YouTube co
 readme = "README.md"
 requires-python = ">=3.9,<3.13"
 dependencies = [
+    "aiohttp",
     "boto3",
     "dagster",
     "dagster-cloud",
+    "pandas",
     "pydantic", 
-    "pytest"
+    "pytest",
+    "s3fs"
 ]
 
 [project.optional-dependencies]

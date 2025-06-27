@@ -1,7 +1,6 @@
 import aiohttp
 import asyncio
 import backoff
-import json
 import logging
 
 from typing import Dict, List

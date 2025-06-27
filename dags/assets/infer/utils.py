@@ -1,5 +1,3 @@
-import boto3
-import io
 import json
 import pandas as pd
 
