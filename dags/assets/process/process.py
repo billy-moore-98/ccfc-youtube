@@ -19,19 +19,18 @@ monthly_partitions = dg.MonthlyPartitionsDefinition("2024-08-01")
 def process_comments(context: dg.AssetExecutionContext, s3: s3Resource):
     """Process and flatten the JSON comments responses for downstream sentiment analysis"""
     processor = Processor()
-    s3_client = s3._client
     partition_key_dt = datetime.strptime(context.partition_key, "%Y-%m-%d")
 
     s3_prefix = f"raw/comments/year={partition_key_dt.year}/month={partition_key_dt.month}"
     context.log.info(f"Listing objects with prefix: {s3_prefix}")
     
-    comment_keys = get_comment_keys_for_partition(s3_client, "ccfcyoutube", s3_prefix)
+    comment_keys = get_comment_keys_for_partition(s3, "ccfcyoutube", s3_prefix)
     context.log.info(f"Found {len(comment_keys)} comment files")
 
     dfs = []
     for key in comment_keys:
         context.log.info(f"Processing {key}")
-        df = read_and_process_comment(s3_client, "ccfcyoutube", key, processor)
+        df = read_and_process_comment(s3, "ccfcyoutube", key, processor)
         dfs.append(df)
 
     context.log.info("Combining all comment DataFrames")
@@ -39,4 +38,4 @@ def process_comments(context: dg.AssetExecutionContext, s3: s3Resource):
 
     dest_key = f"processed/year={partition_key_dt.year}/month={partition_key_dt.month}/comments.jsonl"
     context.log.info(f"Uploading processed comments to {dest_key}")
-    upload_processed_comments(s3_client, "ccfcyoutube", dest_key, combined_df)
+    upload_processed_comments(s3, "ccfcyoutube", dest_key, combined_df)
