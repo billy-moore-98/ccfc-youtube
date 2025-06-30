@@ -36,7 +36,7 @@ def fetch_comments(
             s3_key_prefix = f"{s3_partition_prefix}/video_id={video}"
             # pull state file for video, initialise if not found
             context.log.info(f"Loading state now from : {s3_key_prefix}/state.json")
-            state = load_state_file(s3, "bmooreawsbucket", f"{s3_key_prefix}/state.json")
+            state = load_state_file(s3, "ccfcyoutube", f"{s3_key_prefix}/state.json")
             if not state:
                 context.log.info("State file not found, initializing now")
                 state = {
@@ -65,7 +65,7 @@ def fetch_comments(
                 context.log.info(f"Uploading {len(page['items'])} comments for video id: {video} to S3 at {s3_key_prefix}/comments.jsonl")
                 append_comments_to_comments_file(
                     s3=s3,
-                    bucket="bmooreawsbucket",
+                    bucket="ccfcyoutube",
                     key=f"{s3_key_prefix}/comments.jsonl",
                     new_items=page["items"]
                 )
@@ -80,7 +80,7 @@ def fetch_comments(
                 # update state file
                 context.log.info(f"Updating state file for video id: {video} at {s3_key_prefix}/state.json")
                 s3._client.put_object(
-                    Bucket="bmooreawsbucket",
+                    Bucket="ccfcyoutube",
                     Key=f"{s3_key_prefix}/state.json",
                     Body=json.dumps(state),
                     ContentType="application/json"

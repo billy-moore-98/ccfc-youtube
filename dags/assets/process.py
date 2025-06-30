@@ -21,7 +21,7 @@ def process_comments(context: dg.AssetExecutionContext, s3: s3Resource):
     context.log.info(f"Processing comments for partition {partition_key_dt.date} now")
     context.log.info(f"s3 key prefix is {s3_key_prefix}, listing objects now")
     # list s3 objects for partition
-    comment_objects = s3._client.list_objects_v2(Bucket="bmooreawsbucket", Prefix=s3_key_prefix)
+    comment_objects = s3._client.list_objects_v2(Bucket="ccfcyoutube", Prefix=s3_key_prefix)
     context.log.info(f"{len(comment_objects["Contents"])} objects found, looping through now")
     # loop through the listed objects, obtain key and process comments response
     for comment_object in comment_objects["Contents"]:
@@ -29,7 +29,7 @@ def process_comments(context: dg.AssetExecutionContext, s3: s3Resource):
         if not comment_key.endswith('comments.jsonl'):
             continue
         context.log.info(f"Processing {comment_key} now")
-        response = s3._client.get_object(Bucket="bmooreawsbucket", Key=comment_key)
+        response = s3._client.get_object(Bucket="ccfcyoutube", Key=comment_key)
         comment = response["Body"].read().decode("utf-8")
         comment_processed = processor.run_comments_processing(comment)
         context.log.info("Processed successfully")
@@ -43,7 +43,7 @@ def process_comments(context: dg.AssetExecutionContext, s3: s3Resource):
     destination_key = f"processed/year={partition_key_dt.year}/month={partition_key_dt.month}/comments.jsonl"
     context.log.info("Uploading processed comments to s3")
     s3._client.put_object(
-        Bucket="bmooreawsbucket",
+        Bucket="ccfcyoutube",
         Key=destination_key,
         Body=buffer.getvalue().encode("utf-8")
     )

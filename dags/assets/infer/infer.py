@@ -17,7 +17,7 @@ async def comments_sentiment_inference(context: dg.AssetExecutionContext, s3: s3
     """Run asynchronous API calls to OpenRouterAPI for Youtube comments"""
     partition_dt = datetime.strptime(context.partition_key, "%Y-%m-%d")
     context.log.info(f"Downloading comments data for {partition_dt} now")
-    s3_key = f"s3://bmooreawsbucket/processed/year={partition_dt.year}/month={partition_dt.month}/comments.jsonl"
+    s3_key = f"s3://ccfcyoutube/processed/year={partition_dt.year}/month={partition_dt.month}/comments.jsonl"
     df = pd.read_json(s3_key, orient="records", lines=True)
     context.log.info(f"Filtering df for keywords to reduce noise")
     df = utils.filter_for_relevant_comments(df, "text_display_cleaned")
@@ -62,7 +62,7 @@ async def comments_sentiment_inference(context: dg.AssetExecutionContext, s3: s3
     final_df["year"] = final_df["published_at"].dt.year
     final_df["month"] = final_df["published_at"].dt.month
     final_df.to_parquet(
-        "s3://bmooreawsbucket/sentiment/",
+        "s3://ccfcyoutube/sentiment/",
         engine="pyarrow",
         index=False,
         partition_cols=["year", "month"]

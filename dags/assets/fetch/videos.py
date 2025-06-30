@@ -33,7 +33,7 @@ def fetch_videos(
     s3_key_prefix = f"raw/videos/year={published_after.year}/month={published_after.month}"
     # load state file if exists, populate if it doesn't
     context.log.info(f"Loading state now from : {s3_key_prefix}/state.json")
-    state = load_state_file(s3, "bmooreawsbucket", s3_key_prefix+"/state.json")
+    state = load_state_file(s3, "ccfcyoutube", s3_key_prefix+"/state.json")
     if not state:
         context.log.info("State file not found, initializing now")
         state = {
@@ -65,7 +65,7 @@ def fetch_videos(
                 s3_key = f"{s3_key_prefix}/video_id={video_id}.json"
                 context.log.info(f"Uploading video item with ID: {video_id} to S3 at {s3_key}")
                 s3._client.put_object(
-                    Bucket="bmooreawsbucket",
+                    Bucket="ccfcyoutube",
                     Body=json.dumps(item),
                     Key=s3_key,
                     ContentType="application/json"
@@ -77,7 +77,7 @@ def fetch_videos(
             state["nextPageToken"] = next_page_token
             # update state file
             s3._client.put_object(
-                Bucket="bmooreawsbucket",
+                Bucket="ccfcyoutube",
                 Body=json.dumps(state).encode("utf-8"),
                 Key=f"{s3_key_prefix}/state.json",
                 ContentType="application/json"
