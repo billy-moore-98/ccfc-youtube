@@ -11,6 +11,7 @@ setup(
         "dagster-cloud",
         "pandas",
         "pandera",
+        "pyarrow",
         "pydantic",
         "pytest",
         "s3fs"

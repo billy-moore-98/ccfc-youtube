@@ -38,7 +38,7 @@ def process_page(
     state: dict
 ):
     items = page.get("items", [])
-    context.log.info("Processing page with {len(items)} items")
+    context.log.info(f"Processing page with {len(items)} items")
     for item in items:
         upload_video_to_s3(context, s3, s3_key_prefix, item)
     state["pagesFetched"] += 1
