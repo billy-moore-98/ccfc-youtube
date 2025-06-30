@@ -57,7 +57,7 @@ def fetch_comments(
                 page_token=state.get("nextPageToken", None),
                 max_pages=(5-state["pagesFetched"]) # 20 results * 5 pages = max 100 comments per video
             ):
-                if not page["items"]:
+                if not page.get("items", []):
                     context.log.info(f"No comments for video id: {video}, continuing")
                     continue
                 context.log.info(f"Processing page with {len(page.get('items', []))} items for video id: {video}")
@@ -67,7 +67,7 @@ def fetch_comments(
                     s3=s3,
                     bucket="ccfcyoutube",
                     key=f"{s3_key_prefix}/comments.jsonl",
-                    new_items=page["items"]
+                    new_items=page.get("items", [])
                 )
                 # update state file with pages fetched
                 state["pagesFetched"] += 1
