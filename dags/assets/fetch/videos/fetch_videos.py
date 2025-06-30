@@ -28,9 +28,10 @@ def fetch_videos(
 
     query = "coventry city fc"
     state = load_or_init_state(
-        context,
-        s3,
-        prefix=s3_prefix,
+        context=context,
+        s3=s3,
+        bucket="ccfcyoutube",
+        s3_key_prefix=s3_prefix,
         default_state={
             "query": query,
             "partition": partition_key,
@@ -42,7 +43,14 @@ def fetch_videos(
     )
 
     try:
-        fetch_and_store_videos(context, yt, s3, s3_prefix, query, optional_params, state)
+        fetch_and_store_videos(
+            context=context,
+            s3=s3,
+            yt=yt,
+            s3_key_prefix=s3_prefix,
+            state=state,
+            query=query
+        )
     except QuotaExceededError as e:
         handle_quota_exceeded(context, e)
     except Exception as e:
