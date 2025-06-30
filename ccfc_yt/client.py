@@ -178,9 +178,18 @@ class YoutubeClient:
         }
         if optional_params:
             params.update(optional_params)
-        if paginate and stream:
-            return self._stream_paginate(endpoint, params, page_token=page_token, max_pages=max_pages)
-        elif paginate:
-            return self._paginate(endpoint, params, max_pages=max_pages)
-        else:
-            return self._get_request(endpoint, params)
+        try:
+            if paginate and stream:
+                return self._stream_paginate(endpoint, params, page_token=page_token, max_pages=max_pages)
+            elif paginate:
+                return self._paginate(endpoint, params, max_pages=max_pages)
+            else:
+                return self._get_request(endpoint, params)
+        except requests.exceptions.HTTPError as e:
+            status_code = e.response.status_code
+            if status_code == 403:
+                reason = e.response.json().get("error", {}).get("errors", [{}])[0].get("reason")
+                if reason == "commentsDisabled":
+                    logger.warning(f"Video with id {video_id} has disabled comments. Returning None")
+                    raise
+            raise
