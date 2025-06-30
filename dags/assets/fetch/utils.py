@@ -1,7 +1,5 @@
 import botocore.exceptions
-import io
 import json
-import re
 
 import dagster as dg
 
@@ -23,7 +21,7 @@ def load_or_init_state(
     bucket: str,
     s3_key_prefix: str,
     default_state: Dict
-    ) -> Dict:
+    ) -> Dict | None:
     state_key = f"{s3_key_prefix}/state.json"
     context.log.info(f"Loading state from {state_key} now")
     try:
@@ -31,7 +29,7 @@ def load_or_init_state(
         state = json.loads(response["Body"].read().decode("utf-8"))
     except botocore.exceptions.ClientError as e:
         if e.response["Error"]["Code"] == "NoSuchKey":
-            return {}
+            return None
         else:
             raise e
     if not state:

@@ -65,6 +65,7 @@ def fetch_and_store_comments_for_video(
             "nextPageToken": None
         }
     )
+    context.log.info(f"State is: {state}")
     if state["complete"]:
         context.log.info(f"Comments already fetched for video {video_id}, skipping")
         return
