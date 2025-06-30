@@ -1,7 +1,7 @@
 import logging
 import requests
 
-from ccfc_yt.exceptions import QuotaExceededError
+from ccfc_yt.exceptions import CommentsDisabledError, QuotaExceededError
 from requests.adapters import HTTPAdapter
 from typing import Generator, Union
 from urllib3.util.retry import Retry
@@ -53,6 +53,8 @@ class YoutubeClient:
             if status_code == 403:
                 if reason == "quotaExceeded":
                     raise QuotaExceededError
+                if reason == "commentsDisabled":
+                    raise CommentsDisabledError
             else:
                 logger.error(f"An unexpected 403 error occurred: {reason}")
                 raise
@@ -178,18 +180,9 @@ class YoutubeClient:
         }
         if optional_params:
             params.update(optional_params)
-        try:
-            if paginate and stream:
-                return self._stream_paginate(endpoint, params, page_token=page_token, max_pages=max_pages)
-            elif paginate:
-                return self._paginate(endpoint, params, max_pages=max_pages)
-            else:
-                return self._get_request(endpoint, params)
-        except requests.exceptions.HTTPError as e:
-            status_code = e.response.status_code
-            if status_code == 403:
-                reason = e.response.json().get("error", {}).get("errors", [{}])[0].get("reason")
-                if reason == "commentsDisabled":
-                    logger.warning(f"Video with id {video_id} has disabled comments. Returning None")
-                    raise
-            raise
+        if paginate and stream:
+            return self._stream_paginate(endpoint, params, page_token=page_token, max_pages=max_pages)
+        elif paginate:
+            return self._paginate(endpoint, params, max_pages=max_pages)
+        else:
+            return self._get_request(endpoint, params)
