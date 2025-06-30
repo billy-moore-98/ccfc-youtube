@@ -49,12 +49,11 @@ class YoutubeClient:
         except requests.exceptions.HTTPError as e:
             status_code = e.response.status_code
             error_json = e.response.json()
+            reason = error_json.get("error", {}).get("errors", [{}])[0].get("reason")
             if status_code == 403:
-                reason = error_json.get("error", {}).get("errors", [{}])[0].get("reason")
                 if reason == "quotaExceeded":
                     raise QuotaExceededError
             else:
-                reason = e.response.json().get("error", {}).get("errors", [{}])[0].get("reason")
                 logger.error(f"An unexpected 403 error occurred: {reason}")
                 raise
         except Exception as e:
