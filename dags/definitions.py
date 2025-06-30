@@ -3,7 +3,8 @@ import os
 from dagster import Definitions, load_assets_from_modules
 from dotenv import load_dotenv
 
-from dags.assets.fetch import comments, videos
+from dags.assets.fetch.comments import fetch_comments
+from dags.assets.fetch.videos import fetch_videos
 from dags.assets.infer import infer
 from dags.assets.process import process
 from dags.jobs import comments_sentiment_analysis
@@ -12,7 +13,7 @@ from dags.schedules import monthly_schedule
 
 load_dotenv()
 
-all_assets = load_assets_from_modules([comments, infer, process, videos])
+all_assets = load_assets_from_modules([fetch_comments, infer, process, fetch_videos])
 
 defs = Definitions(
     assets=all_assets,

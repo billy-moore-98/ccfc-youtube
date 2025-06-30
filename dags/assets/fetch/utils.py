@@ -1,60 +1,55 @@
 import botocore.exceptions
-import calendar
 import io
 import json
 import re
 
-from datetime import datetime
+import dagster as dg
+
+from ccfc_yt.exceptions import QuotaExceededError
+from datetime import datetime, timedelta
 from dags.resources import s3Resource
+from typing import Dict
+from zoneinfo import ZoneInfo
 
-# return end of month date from start of month partition
-def get_end_of_month(first_day: datetime) -> datetime:
-    last_day_num = calendar.monthrange(first_day.year, first_day.month)[1]
-    return first_day.replace(day=last_day_num)
+def get_partition_info(date_partition: str, asset_type: str):
+    dt = datetime.strptime(date_partition, "%Y-%m-%d")
+    s3_prefix = f"raw/{asset_type}/year={dt.year}/month={dt.month}"
+    return dt, s3_prefix
 
-# safely load state file
-def load_state_file(s3: s3Resource, bucket: str, s3_key: str) -> dict:
+# safely load or initialise state file
+def load_or_init_state(
+    context: dg.AssetExecutionContext,
+    s3: s3Resource,
+    bucket: str,
+    s3_key_prefix: str,
+    default_state: Dict
+    ) -> Dict:
+    state_key = f"{s3_key_prefix}/state.json"
+    context.log.info(f"Loading state from {state_key} now")
     try:
-        response = s3._client.get_object(Bucket=bucket, Key=s3_key)
-        return json.loads(response["Body"].read().decode("utf-8"))
+        response = s3._client.get_object(Bucket=bucket, Key=state_key)
+        state = json.loads(response["Body"].read().decode("utf-8"))
     except botocore.exceptions.ClientError as e:
         if e.response["Error"]["Code"] == "NoSuchKey":
             return {}
         else:
             raise e
-        
-# get list of video ids for relevant comments asset partition
-def get_videos_list(s3: s3Resource, partition: datetime) -> list[str]:
-    video_ids = []
-    paginator = s3._client.get_paginator("list_objects_v2")
-    s3_partition_prefix = f"raw/videos/year={partition.year}/month={partition.month}"
-    for page in paginator.paginate(Bucket="ccfcyoutube", Prefix=s3_partition_prefix):
-        for obj in page.get("Contents", []):
-            key = obj["Key"]
-            match = re.search(r"video_id=(.+?)\.json$", key)
-            if match:
-                video_ids.append(match.group(1))
-    return video_ids
+    if not state:
+        context.log.info("State not found, initialising")
+        state = default_state
+    return state
 
-# append new comments objects to the comments file stored on s3
-def append_comments_to_comments_file(s3: s3Resource, bucket: str, key: str, new_items: list[dict]):
-    # get object if it exists, if not return empty
-    try:
-        response = s3._client.get_object(Bucket=bucket, Key=key)
-        obj = response["Body"].read().decode("utf-8")
-    except botocore.exceptions.ClientError as e:
-        if e.response['Error']['Code'] == 'NoSuchKey':
-            obj = ""
-        else:
-            raise
-    # write items to string buffer
-    str_buffer = io.StringIO()
-    if obj:
-        str_buffer.write(obj)
-        if not obj.endswith("\n"):
-            str_buffer.write("\n")
-    for item in new_items:
-        str_buffer.write(json.dumps(item) + "\n")
-    # reupload final object
-    s3._client.put_object(Bucket=bucket, Key=key, Body=str_buffer.getvalue(), ContentType="application/json")
-    
+def save_state_file(s3: s3Resource, s3_prefix: str, state: dict):
+    s3._client.put_object(
+        Bucket="ccfcyoutube",
+        Key=f"{s3_prefix}/state.json",
+        Body=json.dumps(state).encode("utf-8"),
+        ContentType="application/json"
+    )
+
+def handle_quota_exceeded(context: dg.AssetExecutionContext, exception: QuotaExceededError):
+    now_pt = datetime.now(ZoneInfo("America/Los_Angeles"))
+    midnight_pt = now_pt.replace(hour=0, minute=0, second=0, microsecond=0) + timedelta(days=1)
+    wait_seconds = int((midnight_pt - now_pt).total_seconds())
+    context.log.warning("YouTube API quota exceeded, retrying after reset.")
+    raise dg.RetryRequested(max_retries=1, seconds_to_wait=wait_seconds) from exception
