@@ -47,6 +47,7 @@ def fetch_comments(
                 }
             # go to next video if comment fetching already completed
             if state["complete"]:
+                context.log.info("Comments fetch already completed, skipping")
                 continue
             for page in yt._client.get_comments_thread(
                 video_id=video,
