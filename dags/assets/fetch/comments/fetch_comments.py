@@ -33,7 +33,7 @@ def fetch_comments(
                 s3=s3,
                 yt=yt,
                 video_id=video_id,
-                s3_key_prefix=s3_prefix
+                s3_prefix=s3_prefix
             )
     except QuotaExceededError as e:
         handle_quota_exceeded(context, e)
