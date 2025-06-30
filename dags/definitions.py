@@ -3,9 +3,9 @@ import os
 from dagster import Definitions, load_assets_from_modules
 from dotenv import load_dotenv
 
-from dags.assets import process
 from dags.assets.fetch import comments, videos
 from dags.assets.infer import infer
+from dags.assets.process import process
 from dags.jobs import comments_sentiment_analysis
 from dags.resources import s3Resource, YtResource
 from dags.schedules import monthly_schedule

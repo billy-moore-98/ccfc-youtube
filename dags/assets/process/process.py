@@ -13,6 +13,7 @@ monthly_partitions = dg.MonthlyPartitionsDefinition("2024-08-01")
     deps=[dg.AssetKey("fetch_comments")]
 )
 def process_comments(context: dg.AssetExecutionContext, s3: s3Resource):
+    """Process and flatten the JSON comments responses for downstream sentiment analysis"""
     processor = Processor()
     dfs = []
     partition_key_dt = datetime.strptime(context.partition_key, "%Y-%m-%d")
