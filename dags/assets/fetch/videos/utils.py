@@ -7,8 +7,7 @@ from dags.resources import s3Resource, YtResource
 from datetime import datetime, timezone
 from typing import Tuple
 
-def get_partition_bounds(date_partition: str) -> Tuple[datetime, datetime]:
-    published_after = datetime.strptime(date_partition, "%Y-%m-%d").replace(tzinfo=timezone.utc)
+def get_partition_bounds(published_after: datetime) -> Tuple[datetime, datetime]:
     last_day_num = calendar.monthrange(published_after.year, published_after.month)[1]
     published_before = published_after.replace(day=last_day_num)
     return published_after, published_before
