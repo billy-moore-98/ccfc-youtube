@@ -27,15 +27,13 @@ def load_or_init_state(
     try:
         response = s3._client.get_object(Bucket=bucket, Key=state_key)
         state = json.loads(response["Body"].read().decode("utf-8"))
+        return state
     except botocore.exceptions.ClientError as e:
         if e.response["Error"]["Code"] == "NoSuchKey":
-            return None
+            context.log.info("State not found, initialising")
+            return default_state
         else:
             raise e
-    if not state:
-        context.log.info("State not found, initialising")
-        state = default_state
-    return state
 
 def save_state_file(s3: s3Resource, s3_prefix: str, state: dict):
     s3._client.put_object(
