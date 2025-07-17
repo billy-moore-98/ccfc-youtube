@@ -28,6 +28,8 @@ services:
       DAGSTER_POSTGRES_PASSWORD: "postgres_password"
       DAGSTER_POSTGRES_DB: "postgres_db"
       DAGSTER_CURRENT_IMAGE: "docker_user_code_image"
+    env_file:
+      - .env
     networks:
       - docker_network
 
