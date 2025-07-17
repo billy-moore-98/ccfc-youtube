@@ -31,10 +31,7 @@ MANIFEST
 venv/
 .venv/
 env/
-.env/
 ENV/
-.env.bak/
-env.bak/
 
 # Jupyter Notebook checkpoints
 .ipynb_checkpoints
