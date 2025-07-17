@@ -11,7 +11,7 @@ from zoneinfo import ZoneInfo
 
 def get_partition_info(date_partition: str, asset_type: str):
     dt = datetime.strptime(date_partition, "%Y-%m-%d")
-    s3_prefix = f"raw/{asset_type}/year={dt.year}/month={dt.month}"
+    s3_prefix = f"bronze/{asset_type}/year={dt.year}/month={dt.month}"
     return dt, s3_prefix
 
 # safely load or initialise state file

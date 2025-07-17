@@ -43,7 +43,7 @@ def filter_for_relevant_comments(df: pd.DataFrame, column: str) -> pd.DataFrame:
     return df
 
 def load_comments_from_s3(partition_dt: datetime) -> pd.DataFrame:
-    s3_key = f"s3://ccfcyoutube/processed/year={partition_dt.year}/month={partition_dt.month}/comments.jsonl"
+    s3_key = f"s3://ccfcyoutube/silver/year={partition_dt.year}/month={partition_dt.month}/comments.jsonl"
     df = pd.read_json(s3_key, orient="records", lines=True)
     df_filtered = filter_for_relevant_comments(df, "text_display_cleaned")
     return df_filtered
@@ -91,7 +91,7 @@ def merge_and_validate_results(original_df: pd.DataFrame, results: list[dict]) -
 
 def write_output_to_s3(df: pd.DataFrame):
     df.to_parquet(
-        "s3://ccfcyoutube/sentiment/",
+        "s3://ccfcyoutube/gold/",
         engine="pyarrow",
         index=False,
         partition_cols=["year", "month"]

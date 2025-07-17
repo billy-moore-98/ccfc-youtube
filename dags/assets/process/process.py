@@ -21,7 +21,7 @@ def process_comments(context: dg.AssetExecutionContext, s3: s3Resource):
     processor = Processor()
     partition_key_dt = datetime.strptime(context.partition_key, "%Y-%m-%d")
 
-    s3_prefix = f"raw/comments/year={partition_key_dt.year}/month={partition_key_dt.month}"
+    s3_prefix = f"bronze/comments/year={partition_key_dt.year}/month={partition_key_dt.month}"
     context.log.info(f"Listing objects with prefix: {s3_prefix}")
     
     comment_keys = get_comment_keys_for_partition(s3, "ccfcyoutube", s3_prefix)
@@ -36,6 +36,6 @@ def process_comments(context: dg.AssetExecutionContext, s3: s3Resource):
     context.log.info("Combining all comment DataFrames")
     combined_df = combine_processed_comments(dfs)
 
-    dest_key = f"processed/year={partition_key_dt.year}/month={partition_key_dt.month}/comments.jsonl"
+    dest_key = f"silver/year={partition_key_dt.year}/month={partition_key_dt.month}/comments.jsonl"
     context.log.info(f"Uploading processed comments to {dest_key}")
     upload_processed_comments(s3, "ccfcyoutube", dest_key, combined_df)
