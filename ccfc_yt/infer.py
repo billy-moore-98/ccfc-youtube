@@ -70,7 +70,6 @@ class OpenRouterAsyncClient:
                     "model": model,
                     "messages": messages
                 }
-                logger.info(f"Posting for omment id: {comment_id} with payload: {data}")
                 tasks.append(
                     (comment_id, self._post(session, endpoint="/chat/completions", data=data))
                 )
