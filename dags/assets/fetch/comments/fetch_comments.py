@@ -6,7 +6,7 @@ from dags.resources import s3Resource, YtResource
 from dags.assets.fetch.comments.utils import fetch_and_store_comments_for_video, get_videos_list
 from dags.assets.fetch.utils import get_partition_info, handle_quota_exceeded
 
-monthly_partitions = dg.MonthlyPartitionsDefinition("2024-08-01")
+monthly_partitions = dg.MonthlyPartitionsDefinition("2023-08-01")
 
 @dg.asset(
     partitions_def=monthly_partitions,

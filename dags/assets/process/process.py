@@ -10,7 +10,7 @@ from dags.assets.process.utils import (
 from dags.resources import s3Resource
 from datetime import datetime
 
-monthly_partitions = dg.MonthlyPartitionsDefinition("2024-08-01")
+monthly_partitions = dg.MonthlyPartitionsDefinition("2023-08-01")
 
 @dg.asset(
     partitions_def=monthly_partitions,
