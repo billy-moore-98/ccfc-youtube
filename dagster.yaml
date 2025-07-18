@@ -23,7 +23,7 @@ run_launcher:
       - DAGSTER_POSTGRES_DB
       - YOUTUBE_API_KEY
       - AWS_ACCESS_KEY_ID
-      - AWS_SECERET_ACCESS_KEY
+      - AWS_SECRET_ACCESS_KEY
       - S3_BUCKET
       - OPENROUTER_API_KEY
     network: docker_network
