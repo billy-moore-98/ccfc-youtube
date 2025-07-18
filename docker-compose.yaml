@@ -61,7 +61,7 @@ services:
       DAGSTER_POSTGRES_DB: "postgres_db"
     volumes: # Make docker client accessible so we can terminate containers from the webserver
       - /var/run/docker.sock:/var/run/docker.sock
-      - /tmp/io_manager_storage:/tmp/io_manager_storage
+      - io_manager_storage:/tmp/io_manager_storage
     networks:
       - docker_network
     depends_on:
@@ -90,7 +90,7 @@ services:
       OPENROUTER_API_KEY: ${OPENROUTER_API_KEY}
     volumes: # Make docker client accessible so we can launch containers using host docker
       - /var/run/docker.sock:/var/run/docker.sock
-      - /tmp/io_manager_storage:/tmp/io_manager_storage
+      - io_manager_storage:/tmp/io_manager_storage
     networks:
       - docker_network
     depends_on:
@@ -98,6 +98,10 @@ services:
         condition: service_healthy
       docker_user_code:
         condition: service_started
+
+volumes:
+  io_manager_storage:
+    name: io_manager_storage
 
 networks:
   docker_network:
