@@ -92,3 +92,6 @@ secrets.env
 
 # Test results
 test-results/
+
+# Streamlit app
+app/
