@@ -35,8 +35,6 @@ services:
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
       S3_BUCKET: ${S3_BUCKET}
       OPENROUTER_API_KEY: ${OPENROUTER_API_KEY}
-    env_file:
-      - .env
     networks:
       - docker_network
 
