@@ -100,7 +100,7 @@ total_counts_chart = alt.Chart(plot_df).mark_bar().encode(
     y=alt.Y("total_comments:Q", title=None),
     color=alt.Color("sentiment:N", scale=alt.Scale(domain=list(sentiment_colors.keys()),
                                                    range=list(sentiment_colors.values()))),
-    tooltip=["month", "sentiment", "total_comments"]
+    tooltip=["year", "month", "sentiment", "total_comments"]
 ).properties(
     width=700,
     height=400,
@@ -122,7 +122,7 @@ proportion_chart = alt.Chart(plot_df).mark_bar().encode(
         ),
         legend=alt.Legend(title="Sentiment")
     ),
-    tooltip=["month", "sentiment", alt.Tooltip("percentage:Q", format=".2f")]
+    tooltip=["year", "month", "sentiment", alt.Tooltip("percentage:Q", format=".2f")]
 ).properties(
     width=700,
     height=400,
@@ -155,7 +155,7 @@ line_chart = alt.Chart(filtered_avg_likes_df).mark_line(point=True).encode(
             range=list(sentiment_colors.values())
         )
     ),
-    tooltip=["year_month", "sentiment", alt.Tooltip("like_count:Q", format=".2f")]
+    tooltip=["year", "month", "sentiment", "avg_like_count"]
 ).properties(
     title="Average Likes per Sentiment over Time",
     width=700,
