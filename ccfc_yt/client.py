@@ -1,4 +1,3 @@
-import logging
 import requests
 
 from ccfc_yt.exceptions import CommentsDisabledError, QuotaExceededError

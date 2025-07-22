@@ -1,7 +1,6 @@
 import aiohttp
 import asyncio
 import backoff
-import logging
 
 from typing import Dict, List
 
@@ -75,6 +74,7 @@ class OpenRouterAsyncClient:
                 tasks.append(
                     (comment_id, self._post(session, endpoint="/chat/completions", data=data))
                 )
+            logger.info("Posting request now")
             # gather tasks together using gather
             responses = await asyncio.gather(
                 *[t[1] for t in tasks], return_exceptions=True
