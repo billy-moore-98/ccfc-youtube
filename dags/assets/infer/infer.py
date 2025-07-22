@@ -1,7 +1,9 @@
 import dagster as dg
+import json
 import os
 
 from dags.assets.infer.utils import (
+    catch_failed_requests,
     load_comments_from_s3,
     prepare_comment_messages,
     run_sentiment_inference,
@@ -9,7 +11,7 @@ from dags.assets.infer.utils import (
     write_output_to_s3
 )
 from dags.resources import s3Resource
-from datetime import datetime
+from datetime import datetime, timezone
 
 monthly_partitions = dg.MonthlyPartitionsDefinition("2023-08-01")
 
@@ -32,7 +34,20 @@ async def comments_sentiment_inference(context: dg.AssetExecutionContext, s3: s3
     results = await run_sentiment_inference(comment_messages, api_key)
     context.log.info("Inference complete")
 
-    final_df = merge_and_validate_results(df, results)
+    success, errors = catch_failed_requests(results)
+    if errors:
+        context.log.warning(f"{len(errors)} requests failed during inference")
+        context.log.info("Uploading unsuccessful requests to S3 for review")
+        run_time = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+        key = f"failed_requests/year={partition_dt.year}/month={partition_dt.month}/failed_requests_{run_time}.json"
+        s3._client.put_object(
+            Bucket="ccfcyoutube",
+            Body=json.dumps(errors),
+            Key=key,
+            ContentType="application/json"
+        )
+
+    final_df = merge_and_validate_results(df, success)
     context.log.info("Results merged and validated")
 
     write_output_to_s3(final_df)

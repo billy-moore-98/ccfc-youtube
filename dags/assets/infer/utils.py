@@ -4,7 +4,7 @@ import pandas as pd
 from ccfc_yt.infer import OpenRouterAsyncClient
 from dags.assets.infer import validate
 from datetime import datetime
-from typing import Dict, List
+from typing import Dict, List, Tuple
 
 SYSTEM_PROMPT = (
     "You are a sentiment analysis assistant. "
@@ -80,6 +80,11 @@ def process_llm_responses(responses: List[Dict]) -> List[Dict]:
         except json.decoder.JSONDecodeError as e:
             print(f"JSONDecodeError for comment: {response["comment_id"]}, string: {raw_content}")
     return sentiments
+
+def catch_failed_requests(responses: List[Dict]) -> Tuple[List[Dict], List[Dict]]:
+    errors = [response for response in responses if response["error"]]
+    success = [response for response in responses if not response["error"]]
+    return success, errors
 
 def merge_and_validate_results(original_df: pd.DataFrame, results: list[dict]) -> pd.DataFrame:
     sentiments_df = pd.DataFrame(process_llm_responses(results))
