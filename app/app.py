@@ -98,7 +98,7 @@ plot_df = filtered_comments_df[filtered_comments_df["sentiment"] != "neutral"]
 total_counts_chart = alt.Chart(plot_df).mark_bar().encode(
     x=alt.X("year_month:O", title=None, axis=alt.Axis(labelAngle=-45)),
     y=alt.Y("total_comments:Q", title=None),
-    color=alt.Color("sentiment:N", scale=alt.Scale(domain=list(sentiment_colors.keys()),
+    color=alt.Color("sentiment:N", legend=None, scale=alt.Scale(domain=list(sentiment_colors.keys()),
                                                    range=list(sentiment_colors.values()))),
     tooltip=["year", "month", "sentiment", "total_comments"]
 ).properties(
@@ -116,11 +116,11 @@ proportion_chart = alt.Chart(plot_df).mark_bar().encode(
     y=alt.Y("percentage:Q", title=None),
     color=alt.Color(
         "sentiment:N",
+        legend=None,
         scale=alt.Scale(
             domain=list(sentiment_colors.keys()),
             range=list(sentiment_colors.values())
-        ),
-        legend=alt.Legend(title="Sentiment")
+        )
     ),
     tooltip=["year", "month", "sentiment", alt.Tooltip("percentage:Q", format=".2f")]
 ).properties(
@@ -133,7 +133,7 @@ proportion_chart = alt.Chart(plot_df).mark_bar().encode(
 counts = filtered_comments_df.groupby("sentiment")["total_comments"].sum().reset_index()
 pie_chart = alt.Chart(counts).mark_arc().encode(
     theta=alt.Theta(field="total_comments", type="quantitative"),
-    color=alt.Color(field="sentiment", type="nominal",
+    color=alt.Color(field="sentiment", type="nominal", legend=None,
                     scale=alt.Scale(domain=list(sentiment_colors.keys()),
                                     range=list(sentiment_colors.values()))),
     tooltip=["sentiment", "total_comments"]
@@ -153,7 +153,8 @@ line_chart = alt.Chart(filtered_avg_likes_df).mark_line(point=True).encode(
         scale=alt.Scale(
             domain=list(sentiment_colors.keys()),
             range=list(sentiment_colors.values())
-        )
+        ),
+        legend=None
     ),
     tooltip=["year", "month", "sentiment", "avg_like_count"]
 ).properties(
