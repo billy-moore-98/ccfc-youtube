@@ -5,7 +5,9 @@ import logging
 
 from typing import Dict, List
 
-logger = logging.getLogger(__name__)
+from dagster import get_dagster_logger
+
+logger = get_dagster_logger()
 
 class OpenRouterAsyncClient:
 

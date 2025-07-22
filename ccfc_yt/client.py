@@ -2,12 +2,13 @@ import logging
 import requests
 
 from ccfc_yt.exceptions import CommentsDisabledError, QuotaExceededError
+from dagster import get_dagster_logger
 from requests.adapters import HTTPAdapter
 from typing import Generator, Union
 from urllib3.util.retry import Retry
 
 
-logger = logging.getLogger(__name__)
+logger = get_dagster_logger()
 
 # Class built using bare requests module instead of google-api-python-client for maximum control and testability
 
