@@ -120,7 +120,7 @@ streamlit run ./app/app.py
 
 An example of the dashboard is provided below, illustrating the sentiment trends over the course of 2 football seasons. A couple things to note:
 
-- In 202409 Coventry sacked there long time serving manager Mark Robins. Fans didn't seem too happy about this for a couple months...but then the new manager Frank Lampard went on a club record winning streak!
+- In 202409 Coventry sacked their long time serving manager Mark Robins. Fans didn't seem too happy about this for a couple months...but then the new manager Frank Lampard went on a club record winning streak!
 - In 202403 Coventry played an FA Cup semi final classic against giants Manchester United who have a much larger fanbase. This can be seen in the spiked increase in interaction from total comments and average likes.
 
 ![Dashboard analysis](docs/img/dashboard.jpg)
