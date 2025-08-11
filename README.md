@@ -10,8 +10,8 @@ The repository contains source code for data ingestion, orchestration, and deplo
 - [Architecture](#architecture)
 - [Technologies](#technologies)
 - [Setup & Installation](#setup--installation)
-- [Source Code](#source-code)
-- [Data Pipeline Details](#data-pipeline-details)
+- [Source Code](docs/source_code.md)
+- [Data Pipeline Details](docs/data_pipeline_details.md)
 - [Testing](#testing)
 - [Deployment](#deployment)
 
@@ -42,7 +42,6 @@ This project implements a **medallion data lakehouse architecture** on AWS, orga
 
 #### Silver Layer
 - Cleans and standardizes comments data.
-- Combines data for each year/month partition to simplify downstream processing.
 
 #### Gold Layer
 - Enriches data via asynchronous sentiment inference API calls.
@@ -54,8 +53,8 @@ This project implements a **medallion data lakehouse architecture** on AWS, orga
 - **AWS Athena** is used for ad-hoc and analytical queries over the Gold layer, enabling serverless, scalable, and performant querying for dashboard visualizations.
 
 ### Orchestration and Deployment
-- **Dagster** orchestrates the end-to-end workflow, managing task dependencies, scheduling, and automation. See [Data Pipeline Details](#data-pipeline-details) for more information.
-- Custom Python code handles data extraction and asynchronous sentiment inference. Details are in [Source Code](#source-code).
+- **Dagster** orchestrates the end-to-end workflow, managing task dependencies, scheduling, and automation. See [Data Pipeline Details](docs/data_pipeline_details.md) for more information.
+- Custom Python code handles data extraction and asynchronous sentiment inference. Details are in [Source Code](docs/source_code.md).
 - **Docker Compose** containerizes the environment, including:
   - Dagster webserver
   - Dagster daemon
