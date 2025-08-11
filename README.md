@@ -1,47 +1,129 @@
-# ccfc_yt_dags
+# ccfc-youtube
 
-This is a [Dagster](https://dagster.io/) project scaffolded with [`dagster project scaffold`](https://docs.dagster.io/guides/build/projects/creating-a-new-project).
+This project performs sentiment analysis on **YouTube** comments related to **Coventry City Football Club** videos using **GPT-4.1 Nano**, a lightweight large language model variant. The analysis is presented through an interactive Streamlit dashboard.
 
-## Getting started
+The repository contains source code for data ingestion, orchestration, and deployment to run the pipeline locally. It harvests data into **AWS S3** and performs asynchronous sentiment inference via **API** calls, enabling efficient processing and **Docker-based deployment** on local environments.
 
-First, install your Dagster code location as a Python package. By using the --editable flag, pip will install your Python package in ["editable mode"](https://pip.pypa.io/en/latest/topics/local-project-installs/#editable-installs) so that as you develop, local code changes will automatically apply.
+## Contents
+
+- [Overview](#overview)
+- [Architecture](#architecture)
+- [Technologies](#technologies)
+- [Setup & Installation](#setup--installation)
+- [Source Code](#source-code)
+- [Data Pipeline Details](#data-pipeline-details)
+- [Testing](#testing)
+- [Deployment](#deployment)
+
+## Overview
+
+Sentiment analysis is a natural language processing technique that determines the emotional tone of text as positive, neutral, or negative. Common use cases include customer feedback analysis, social media monitoring, and market research.
+
+This project applies sentiment analysis to YouTube comments on Coventry City FC videos to track fan sentiment throughout the football season.
+
+The pipeline integrates the Google YouTube API — which provides access to video metadata, comments, playlists, and analytics — with the OpenRouter LLMs API, a unified interface for large language model prompting.
+
+Data is stored in AWS S3 and queried using AWS Athena, allowing performant, serverless analytical SQL queries that power the Streamlit dashboard’s interactive visualizations. This combination supports automated data extraction, sentiment inference, and trend tracking.
+
+Dagster orchestrates the pipeline execution to ensure reliability and idempotency, while Docker enables containerized deployment for easy setup in both local and cloud environments.
+
+## Architecture
+
+This project implements a **medallion data lakehouse architecture** on AWS, organizing data into layers that progressively improve data quality, structure, and usability.
+
+### Data Layers
+
+#### Bronze Layer
+- Stores raw, ingested data fetched from the YouTube API in its original, unmodified format, partitioned by year and month.
+- Preserves all source data for traceability, reprocessing, and auditing.
+- Contains:
+  - Video metadata from a "Coventry City FC" YouTube search
+  - Associated comment metadata for these videos
+
+#### Silver Layer
+- Cleans and standardizes comments data.
+- Combines data for each year/month partition to simplify downstream processing.
+
+#### Gold Layer
+- Enriches data via asynchronous sentiment inference API calls.
+- Applies validation checks before storing as Parquet files optimized for analytics.
+- Serves as the primary source for scalable analytics and reporting in the Streamlit dashboard.
+
+### Storage and Querying
+- **AWS S3** hosts all data layers, providing cost-effective, durable, and highly available storage.
+- **AWS Athena** is used for ad-hoc and analytical queries over the Gold layer, enabling serverless, scalable, and performant querying for dashboard visualizations.
+
+### Orchestration and Deployment
+- **Dagster** orchestrates the end-to-end workflow, managing task dependencies, scheduling, and automation. See [Data Pipeline Details](#data-pipeline-details) for more information.
+- Custom Python code handles data extraction and asynchronous sentiment inference. Details are in [Source Code](#source-code).
+- **Docker Compose** containerizes the environment, including:
+  - Dagster webserver
+  - Dagster daemon
+  - Log/compute storage service
+- Supports deployment locally or on cloud environments for flexible execution.
+
+## Technologies
+
+This project leverages the following technologies:
+
+- **Python** — Core programming language used for data ingestion, transformation, orchestration, and API interaction.  
+- **SQL** — Used within AWS Athena for querying and analyzing data stored in the data lakehouse.  
+- **YouTube API** — Source of video metadata and comment data related to Coventry City FC.  
+- **OpenRouter API** — Provides access to large language models for asynchronous sentiment inference on comments.  
+- **AWS S3** — Object storage service used as the data lake for storing raw, cleaned, and enriched datasets.  
+- **AWS Athena** — Serverless query engine for running analytical SQL queries over data stored in S3.  
+- **Streamlit** — Framework for building the interactive dashboard to visualize sentiment trends and insights.  
+- **Dagster** — Orchestration platform managing pipeline scheduling, dependencies, and automation.  
+- **Docker** — Containerization tool used to package and deploy the entire pipeline and orchestration stack consistently across environments.
+
+## Setup & Installation
+
+Follow these steps to set up and run the project locally.
+
+### Prerequisites
+- Python 3.10+
+- Docker and Docker Compose
+- AWS credentials with appropriate permissions for S3 (**ccfcyoutube** bucket created) and Athena
+- YouTube and OpenRouter API keys
+
+### Clone the repository
 
 ```bash
-pip install -e ".[dev]"
+git clone https://github.com/billy-moore-98/ccfc-youtube.git
+cd ccfc-youtube
 ```
 
-Then, start the Dagster UI web server:
+### Configure Environment Variables
+
+Set the following environment variables in a ```.env``` file at the project root.
+
+- ```AWS_ACCESS_KEY_ID```
+- ```AWS_SECRET_ACCESS_KEY```
+- ```OPENROUTER_API_KEY```
+- ```YOUTUBE_API_KEY```
+
+### Build and start Docker containers
 
 ```bash
-dagster dev
+docker compose up --build
 ```
 
-Open http://localhost:3000 with your browser to see the project.
+### Access Dagster UI and Dashboard
 
-You can start writing assets in `ccfc_yt_dags/assets.py`. The assets are automatically loaded into the Dagster code location as you define them.
+Access the UI to trigger and monitor pipelines.
 
-## Development
+- Dagster UI: [http://localhost:3000](http://localhost:3000)
 
-### Adding new Python dependencies
-
-You can specify new Python dependencies in `setup.py`.
-
-### Unit testing
-
-Tests are in the `ccfc_yt_dags_tests` directory and you can run tests using `pytest`:
+Once successfully completed for however many partitions you want, run Streamlit:
 
 ```bash
-pytest ccfc_yt_dags_tests
+streamlit run ./app/app.py
 ```
 
-### Schedules and sensors
+## Source Code
 
-If you want to enable Dagster [Schedules](https://docs.dagster.io/guides/automate/schedules/) or [Sensors](https://docs.dagster.io/guides/automate/sensors/) for your jobs, the [Dagster Daemon](https://docs.dagster.io/guides/deploy/execution/dagster-daemon) process must be running. This is done automatically when you run `dagster dev`.
+## Data Pipeline Details
 
-Once your Dagster Daemon is running, you can start turning on schedules and sensors for your jobs.
+## Deployment Details
 
-## Deploy on Dagster+
-
-The easiest way to deploy your Dagster project is to use Dagster+.
-
-Check out the [Dagster+ documentation](https://docs.dagster.io/dagster-plus/) to learn more.
+## Testing
