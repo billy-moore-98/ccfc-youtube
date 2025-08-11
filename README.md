@@ -12,8 +12,7 @@ The repository contains source code for data ingestion, orchestration, and deplo
 - [Setup & Installation](#setup--installation)
 - [Source Code](docs/source_code.md)
 - [Data Pipeline Details](docs/data_pipeline_details.md)
-- [Testing](#testing)
-- [Deployment](#deployment)
+- [Deployment](docs/deployment_details.md)
 
 ## Overview
 
@@ -119,10 +118,9 @@ Once successfully completed for however many partitions you want, run Streamlit:
 streamlit run ./app/app.py
 ```
 
-## Source Code
+An example of the dashboard is provided below, illustrating the sentiment trends over the course of 2 football seasons. A couple things to note:
 
-## Data Pipeline Details
+- In 202409 Coventry sacked there long time serving manager Mark Robins. Fans didn't seem too happy about this for a couple months...
+- In 202403 Coventry played an FA Cup semi final classic against giants Manchester United who have a much larger fanbase. This can be seen in the spiked increase in interaction from total comments and average likes.
 
-## Deployment Details
-
-## Testing
+![Dashboard analysis](docs/img/dashboard.jpg)
