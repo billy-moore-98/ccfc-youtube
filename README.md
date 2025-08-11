@@ -84,7 +84,7 @@ Follow these steps to set up and run the project locally.
 - Python 3.10+
 - Docker and Docker Compose
 - AWS credentials with appropriate permissions for S3 (**ccfcyoutube** bucket created) and Athena
-- YouTube and OpenRouter API keys
+- [YouTube](https://developers.google.com/youtube/v3) and [OpenRouter](https://openrouter.ai/) API keys
 
 ### Clone the repository
 
